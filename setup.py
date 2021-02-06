@@ -3,7 +3,14 @@ from setuptools import setup
 setup(
     name='LISC',
     version='0.1.001',
-    py_modules=['main'],
+    description="Low Intensity Sensor Calibration",
+    author="Alexandre Simoneau",
+    py_modules=[
+        'main',
+        'linearity',
+        'flatfield',
+        'cosmicray',
+        'photometry'],
     install_requires=[
         'Click',
         'numpy',

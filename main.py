@@ -12,9 +12,13 @@ def lisc():
     """
     pass # Entry point
 
-# functions = (
-# )
-#
-# for module_name,method in functions:
-#     module = import_module(module_name)
-#     lisc.add_command(getattr(module,method))
+functions = (
+    ("linearity","linearity"),
+    ("flatfield","flatfield"),
+    ("cosmicray","cosmicray"),
+    ("photometry","photometry")
+)
+
+for module_name,method in functions:
+    module = import_module(module_name)
+    lisc.add_command(getattr(module,method))
