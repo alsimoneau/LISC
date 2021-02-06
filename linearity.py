@@ -12,6 +12,6 @@ import click
 
 @click.command()
 def linearity():
-	"""Process frames for linearity calibration.
-	"""
+    """Process frames for linearity calibration.
+    """
     pass

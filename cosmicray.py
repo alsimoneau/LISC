@@ -12,6 +12,6 @@ import click
 
 @click.command()
 def cosmicray():
-	"""Process frames for cosmic ray correction.
-	"""
+    """Process frames for cosmic ray correction.
+    """
     pass

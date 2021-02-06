@@ -12,6 +12,6 @@ import click
 
 @click.command()
 def flatfield():
-	"""Process frames for flat field calibration.
-	"""
+    """Process frames for flat field calibration.
+    """
     pass

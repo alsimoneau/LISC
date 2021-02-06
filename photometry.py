@@ -12,6 +12,6 @@ import click
 
 @click.command()
 def photometry():
-	"""Process frames for stellar photometry calibration.
-	"""
+    """Process frames for stellar photometry calibration.
+    """
     pass
