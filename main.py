@@ -15,7 +15,6 @@ def lisc():
 functions = (
     ("linearity","linearity"),
     ("flatfield","flatfield"),
-    ("cosmicray","cosmicray"),
     ("photometry","photometry")
 )
 

@@ -9,6 +9,7 @@
 # Edited: February 2021
 
 import click
+from cosmicray import cosmicray
 
 @click.command()
 def photometry():
