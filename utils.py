@@ -36,9 +36,5 @@ def correct_flat(data,flat):
     pass
 
 def cosmicray_removal(data):
-    '''
-    [1] van Dokkum, P; 2001, “Cosmic-Ray Rejection by Laplacian Edge Detection”. The Publications of the Astronomical Society of the Pacific, Volume 113, Issue 789, pp. 1420-1427. doi: 10.1086/323894
-    [2] McCully, C., 2014, “Astro-SCRAPPY”, https://github.com/astropy/astroscrappy
-    '''
     #ccdproc.cosmicray_lacosmic
     pass
