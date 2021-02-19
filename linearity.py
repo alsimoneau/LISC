@@ -9,10 +9,12 @@
 # Edited: February 2021
 
 import click
-from cosmicray import cosmicray
 
-@click.command()
-def linearity():
+@click.command(name="linearity")
+def CLI_linearity():
     """Process frames for linearity calibration.
     """
+    linearity()
+
+def linearity():
     pass

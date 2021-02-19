@@ -9,10 +9,12 @@
 # Edited: February 2021
 
 import click
-from cosmicray import cosmicray
 
-@click.command()
-def photometry():
+@click.command(name="photometry")
+def CLI_photometry():
     """Process frames for stellar photometry calibration.
     """
+    photometry()
+
+def photometry():
     pass

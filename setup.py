@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='LISC',
-    version='0.1.001',
+    version='0.1.1',
     description="Low Intensity Sensor Calibration",
     author="Alexandre Simoneau",
     py_modules=[

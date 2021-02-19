@@ -9,10 +9,12 @@
 # Edited: February 2021
 
 import click
-from cosmicray import cosmicray
 
-@click.command()
-def flatfield():
+@click.command(name="flatfield")
+def CLI_flatfield():
     """Process frames for flat field calibration.
     """
+    flatfield()
+
+def flatfield():
     pass
