@@ -25,6 +25,7 @@ def open_raw(fname):
     return data
 
 def open_dark(fnames):
+    #ccdproc.combine
     pass
 
 def substract_dark(data,dark):
@@ -35,6 +36,14 @@ def correct_flat(data,flat):
     #ccdproc.flat_correct
     pass
 
-def cosmicray_removal(data):
-    #ccdproc.cosmicray_lacosmic
-    pass
+def cosmicray_removal(image,**kwargs):
+    if "sigclip" not in kwargs:
+        kwargs['sigclip'] = 25
+    if image.data.ndim == 3:
+        new_data = np.stack( [
+            ccdproc.cosmicray_lacosmic(image.data[:,:,i],**kwargs)[0] \
+            for i in range(image.data.shape[2])
+        ], axis=2 )
+    else:
+        new_data = ccdproc.cosmicray_lacosmic(image.data,**kwargs)[0]
+    return CCDData(new_data,unit=u.adu)
