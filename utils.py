@@ -24,7 +24,7 @@ def open_raw(fname, normalize=False):
         rgb /= 2**16 - 1
 
     data = CCDData(rgb,unit=u.adu)
-    data.header['exposure'] = exposure
+    data.header['exposure'] = exposure * u.s
     return data
 
 def open_dark(fnames):
@@ -40,13 +40,15 @@ def open_dark(fnames):
         dark = ccdproc.combine(frames, sigma_clip=True)
     return dark
 
-def substract_dark(data,dark):
-    #ccdproc.substract_dark
-    pass
+def subtract_dark(data,dark):
+    return ccdproc.subtract_dark(
+        data, dark,
+        data_exposure = data.header['exposure'],
+        dark_exposure = dark.header['exposure']
+    )
 
 def correct_flat(data,flat):
-    #ccdproc.flat_correct
-    pass
+    return ccdproc.flat_correct(data,flat)
 
 def cosmicray_removal(image,**kwargs):
     if "sigclip" not in kwargs:
