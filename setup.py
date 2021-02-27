@@ -20,7 +20,8 @@ setup(
         'rawpy',
         'astroscrappy@git+https://github.com/astropy/astroscrappy@master',
         'ccdproc',
-        'pyyaml'
+        'pyyaml',
+        'tables@git+https://github.com/PyTables/PyTables@master'
     ],
     entry_points='''
         [console_scripts]

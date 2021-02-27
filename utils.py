@@ -3,9 +3,12 @@ import ccdproc
 import rawpy
 from astropy import units as u
 from astropy.nddata import CCDData
+from astropy.stats import sigma_clipped_stats
 import exiftool
+import tables
 
 def open_raw(fname, normalize=False):
+    print(fname)
     raw = rawpy.imread(fname)
     rgb = raw.postprocess(
         gamma = (1,1),
@@ -23,22 +26,23 @@ def open_raw(fname, normalize=False):
     if normalize:
         rgb /= 2**16 - 1
 
-    data = CCDData(rgb,unit=u.adu)
-    data.header['exposure'] = exposure * u.s
-    return data
+    #data = CCDData(rgb,unit=u.adu)
+    #data.header['exposure'] = exposure * u.s
+    return rgb
 
-def open_dark(fnames):
-    frames = [ open_raw(fname) for fname in fnames ]
-    if frames[0].data.ndim == 3:
-        dark = np.stack( [
-            ccdproc.combine([f[:,:,i] for f in frames], sigma_clip=True) \
-            for i in range(3)
-        ], axis=2 )
-        dark = CCDData(dark,unit=u.adu)
-        dark.header = frames[0].header
-    else:
-        dark = ccdproc.combine(frames, sigma_clip=True)
-    return dark
+def open_multiple(fnames,filename):
+    for i,fname in enumerate(fnames):
+        rgb = open_raw(fname)
+        if i == 0:
+            shape = (0,) + rgb.shape
+            f = tables.open_file(filename,mode='w')
+            arr = f.create_earray(f.root,'data',obj=np.zeros(shape))
+        arr.append(rgb[None])
+    return f,arr
+
+def open_mean(fnames):
+    frames = np.array([ open_raw(fname) for fname in fnames ])
+    return sigma_clipped_stats(frames,axis=0)
 
 def subtract_dark(data,dark):
     return ccdproc.subtract_dark(
