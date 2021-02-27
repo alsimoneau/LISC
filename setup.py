@@ -10,6 +10,7 @@ setup(
         'linearity',
         'flatfield',
         'photometry',
+        'init'
         'utils'],
     install_requires=[
         'Click',
@@ -18,7 +19,8 @@ setup(
         'pyexiftool',
         'rawpy',
         'astroscrappy@git+https://github.com/astropy/astroscrappy@master',
-        'ccdproc'
+        'ccdproc',
+        'pyyaml'
     ],
     entry_points='''
         [console_scripts]

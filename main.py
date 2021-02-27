@@ -15,7 +15,8 @@ def lisc():
 functions = (
     ("linearity","CLI_linearity"),
     ("flatfield","CLI_flatfield"),
-    ("photometry","CLI_photometry")
+    ("photometry","CLI_photometry"),
+    ("init","init")
 )
 
 for module_name,method in functions:
