@@ -1,14 +1,24 @@
 import numpy as np
-import ccdproc
 import rawpy
-from astropy import units as u
-from astropy.nddata import CCDData
-from astropy.stats import sigma_clipped_stats
+from astroscrappy import detect_cosmics
 import exiftool
-import tables
+
+# Taken from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+def _update(existingAggregate, newValue):
+    (count, mean, M2) = existingAggregate
+    count += 1
+    delta = newValue - mean
+    mean += delta / count
+    delta2 = newValue - mean
+    M2 += delta * delta2
+    return (count, mean, M2)
+
+def _finalize(existingAggregate):
+    (count, mean, M2) = existingAggregate
+    return (mean, M2 / count)
 
 def open_raw(fname, normalize=False):
-    print(fname)
+    print(f"Opening raw file '{fname}'")
     raw = rawpy.imread(fname)
     rgb = raw.postprocess(
         gamma = (1,1),
@@ -26,44 +36,37 @@ def open_raw(fname, normalize=False):
     if normalize:
         rgb /= 2**16 - 1
 
-    #data = CCDData(rgb,unit=u.adu)
-    #data.header['exposure'] = exposure * u.s
     return rgb
 
-def open_multiple(fnames,filename):
-    for i,fname in enumerate(fnames):
+def compute_stats(fnames):
+    rgb = open_raw(fnames[0]).astype(np.float64)
+    aggregate = (1,rgb,np.zeros_like(rgb))
+    for fname in fnames[1:]:
         rgb = open_raw(fname)
-        if i == 0:
-            shape = (0,) + rgb.shape
-            f = tables.open_file(filename,mode='w')
-            arr = f.create_earray(f.root,'data',obj=np.zeros(shape))
-        arr.append(rgb[None])
-    return f,arr
+        aggregate = _update(aggregate,rgb)
+    mean, variance = _finalize(aggregate)
+    return mean, np.sqrt(variance)
 
-def open_mean(fnames):
-    frames = np.array([ open_raw(fname) for fname in fnames ])
-    return sigma_clipped_stats(frames,axis=0)
-
-def subtract_dark(data,dark):
-    return ccdproc.subtract_dark(
-        data, dark,
-        data_exposure = data.header['exposure'],
-        dark_exposure = dark.header['exposure']
-    )
-
-def correct_flat(data,flat):
-    return ccdproc.flat_correct(data,flat)
+def open_clipped(fnames,mean=None,stdev=None,n=5):
+    if mean is None or stdev is None:
+        print("Computing statistics...")
+        mean,stdev = compute_stats(fnames)
+    print("Clipping files...")
+    arr = open_raw(fnames[0]).astype(np.float64)
+    for fname in fnames[1:]:
+        rgb = open_raw(fname).astype(np.float64)
+        rgb[np.abs(rgb-mean) > stdev*n] = np.nan
+        arr = np.nanmean([arr,rgb],0)
+    return np.round(arr).astype(np.uint16)
 
 def cosmicray_removal(image,**kwargs):
     if "sigclip" not in kwargs:
         kwargs['sigclip'] = 25
-    if image.data.ndim == 3:
+    if image.ndim == 3:
         new_data = np.stack( [
-            ccdproc.cosmicray_lacosmic(image.data[:,:,i],**kwargs)[0] \
+            detect_cosmics(image[:,:,i],**kwargs)[1] \
             for i in range(3)
         ], axis=2 )
     else:
-        new_data = ccdproc.cosmicray_lacosmic(image.data,**kwargs)[0]
-    new_data = CCDData(new_data,unit=u.adu)
-    new_data.header = image.header
+        new_data = detect_cosmics(image,**kwargs)[1]
     return new_data

@@ -18,10 +18,7 @@ setup(
         'matplotlib',
         'pyexiftool',
         'rawpy',
-        'astroscrappy@git+https://github.com/astropy/astroscrappy@master',
-        'ccdproc',
-        'pyyaml',
-        'tables@git+https://github.com/PyTables/PyTables@master'
+        'astroscrappy@git+https://github.com/astropy/astroscrappy@master'
     ],
     entry_points='''
         [console_scripts]
