@@ -3,20 +3,6 @@ import rawpy
 from astroscrappy import detect_cosmics
 import exiftool
 
-# Taken from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-def _update(existingAggregate, newValue):
-    (count, mean, M2) = existingAggregate
-    count += 1
-    delta = newValue - mean
-    mean += delta / count
-    delta2 = newValue - mean
-    M2 += delta * delta2
-    return (count, mean, M2)
-
-def _finalize(existingAggregate):
-    (count, mean, M2) = existingAggregate
-    return (mean, M2 / count)
-
 def open_raw(fname, normalize=False):
     print(f"Opening raw file '{fname}'")
     raw = rawpy.imread(fname)
@@ -39,6 +25,20 @@ def open_raw(fname, normalize=False):
     return rgb
 
 def compute_stats(fnames):
+    # Taken from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+    def _update(existingAggregate, newValue):
+        (count, mean, M2) = existingAggregate
+        count += 1
+        delta = newValue - mean
+        mean += delta / count
+        delta2 = newValue - mean
+        M2 += delta * delta2
+        return (count, mean, M2)
+
+    def _finalize(existingAggregate):
+        (count, mean, M2) = existingAggregate
+        return (mean, M2 / count)
+
     rgb = open_raw(fnames[0]).astype(np.float64)
     aggregate = (1,rgb,np.zeros_like(rgb))
     for fname in fnames[1:]:
@@ -47,7 +47,7 @@ def compute_stats(fnames):
     mean, variance = _finalize(aggregate)
     return mean, np.sqrt(variance)
 
-def open_clipped(fnames,mean=None,stdev=None,n=5):
+def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
     if mean is None or stdev is None:
         print("Computing statistics...")
         mean,stdev = compute_stats(fnames)
@@ -55,7 +55,7 @@ def open_clipped(fnames,mean=None,stdev=None,n=5):
     arr = open_raw(fnames[0]).astype(np.float64)
     for fname in fnames[1:]:
         rgb = open_raw(fname).astype(np.float64)
-        rgb[np.abs(rgb-mean) > stdev*n] = np.nan
+        rgb[np.abs(rgb-mean) > stdev*sigclip] = np.nan
         arr = np.nanmean([arr,rgb],0)
     return np.round(arr).astype(np.uint16)
 
