@@ -48,6 +48,8 @@ def compute_stats(fnames):
     return mean, np.sqrt(variance)
 
 def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
+    if type(fnames) == str or len(fnames) == 0:
+        raise(TypeError("open_clipped expects a list of strings.")) 
     if mean is None or stdev is None:
         print("Computing statistics...")
         mean,stdev = compute_stats(fnames)
@@ -56,8 +58,8 @@ def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
     for fname in fnames[1:]:
         rgb = open_raw(fname).astype(np.float64)
         rgb[np.abs(rgb-mean) > stdev*sigclip] = np.nan
-        arr = np.nanmean([arr,rgb],0)
-    return np.round(arr).astype(np.uint16)
+        arr = np.nansum([arr,rgb],0)
+    return np.round(arr/len(fnames)).astype(np.uint16)
 
 def cosmicray_removal(image,**kwargs):
     if "sigclip" not in kwargs:
