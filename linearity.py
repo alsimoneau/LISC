@@ -16,7 +16,7 @@ import exiftool
 from utils import open_clipped as Open, sub
 import yaml
 
-@click.command(name="linearity")
+@click.command(name="lin")
 def CLI_linearity():
     """Process frames for linearity calibration.
     """

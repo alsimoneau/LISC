@@ -15,7 +15,7 @@ from scipy.optimize import curve_fit, leastsq
 import yaml
 from utils import cycle_mod
 
-@click.command(name="starfield")
+@click.command(name="geo")
 def CLI_starfield():
     """Process frames for star field calibration.
     """

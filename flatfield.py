@@ -15,7 +15,7 @@ import os
 from scipy.ndimage import gaussian_filter
 from utils import open_clipped, open_raw, sub
 
-@click.command(name="flatfield")
+@click.command(name="flat")
 def CLI_flatfield():
     """Process frames for flat field calibration.
     """

@@ -17,7 +17,7 @@ import os
 import exiftool
 from utils import open_clipped, open_raw, sub
 
-@click.command(name="photometry")
+@click.command(name="photo")
 def CLI_photometry():
     """Process frames for stellar photometry calibration.
     """
