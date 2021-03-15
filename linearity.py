@@ -38,6 +38,4 @@ def linearity():
         print(exp,*frame.mean((0,1)))
         data.append((exp,*frame.mean((0,1))))
 
-    data = np.asarray(data,dtype=float)
-    #data = data[np.argsort(data[:,0])]
-    np.savetxt("linearity.dat",data)
+    pd.DataFrame(data,columns=["Exposure","R","G","B"]).to_csv("linearity.csv")

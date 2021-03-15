@@ -17,6 +17,7 @@ functions = (
     ("flatfield","CLI_flatfield"),
     ("photometry","CLI_photometry"),
     ("starfield","CLI_starfield"),
+    ("init","dir"),
     ("init","init")
 )
 
