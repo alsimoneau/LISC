@@ -32,6 +32,8 @@ def init(folder_name):
     config.append("device model: ")
     config.append("lens model: " )
     config.append("focal lenght: # in mm" )
+    config.append("resolution: # [X, Y]")
+    config.append("pixel size: # in µm")
 
     with open(os.path.join(folder_name,"config.ini"),'w') as f:
         f.write('\n'.join(config))

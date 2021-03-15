@@ -18,6 +18,8 @@ setup(
         'numpy',
         'matplotlib',
         'pyyaml',
+        'pandas',
+        'scipy',
         'pyexiftool',
         'rawpy',
         'astroscrappy@git+https://github.com/astropy/astroscrappy@master'

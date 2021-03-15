@@ -75,3 +75,8 @@ def cosmicray_removal(image,**kwargs):
 
 def sub(frame,dark):
     return frame.astype(np.int32)-dark
+
+def cycle_mod(x,a=2*np.pi):
+    pos = x%a
+    neg = x%-a
+    return np.where(np.abs(neg) < pos, neg, pos)
