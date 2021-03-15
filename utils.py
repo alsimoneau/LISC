@@ -2,6 +2,7 @@ import numpy as np
 import rawpy
 from astroscrappy import detect_cosmics
 import exiftool
+from glob import glob
 
 def open_raw(fname, normalize=False):
     print(f"Opening raw file '{fname}'")
@@ -49,7 +50,10 @@ def compute_stats(fnames):
 
 def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
     if type(fnames) == str or len(fnames) == 0:
-        raise(TypeError("open_clipped expects a list of strings."))
+        if "*" in fnames or "?" in fnames:
+            fnames = glob(fnames)
+        else:
+            raise(TypeError("open_clipped expects a list of strings."))
     if mean is None or stdev is None:
         print("Computing statistics...")
         mean,stdev = compute_stats(fnames)
