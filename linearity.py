@@ -13,8 +13,8 @@ import os
 import numpy as np
 from glob import glob
 import exiftool
-from utils import open_clipped as Open
-from utils import sub
+from utils import open_clipped as Open, sub
+import yaml
 
 @click.command(name="linearity")
 def CLI_linearity():
@@ -23,8 +23,15 @@ def CLI_linearity():
     linearity()
     print("Done.")
 
-def linearity():
+def linearity(size=25):
     set_times = { int(fname.split(os.sep)[-1].split('_')[0]) for fname in glob("LINEARITY/*.*") }
+
+    with open("params") as f:
+        params = yaml.safe_load(f)
+    Nx = params['width']
+    Ny = params['height']
+    mask = np.zeros((Ny,Nx),dtype=np.bool8)
+    mask[Ny//2 - size: Ny//2 + size + 1, Nx//2 - size: Nx//2 + size + 1] = True
 
     data = []
     for ss in sorted(set_times):
@@ -35,7 +42,7 @@ def linearity():
         dark = Open(glob(f"LINEARITY/DARKS/{ss}_*"))
         frame = sub(frame,dark)
 
-        print(exp,*frame.mean((0,1)))
-        data.append((exp,*frame.mean((0,1))))
+        print(exp,*frame[mask].mean(0))
+        data.append((exp,*frame[mask].mean(0)))
 
     pd.DataFrame(data,columns=["Exposure","R","G","B"]).to_csv("linearity.csv")

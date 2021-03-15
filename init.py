@@ -114,10 +114,11 @@ def init():
 
         params = [
             f"camera: {exif['EXIF:Make']} {exif['EXIF:Model']}",
-            f"lens: {exif['EXIF:LensModel']}",
             f"height: {exif['MakerNotes:SonyImageHeightMax']}",
             f"width: {exif['MakerNotes:SonyImageWidthMax']}",
-            f"pixel_size: ---- # in µm"
+            f"lens: {exif['EXIF:LensModel']}",
+            "focal_length: ----",
+            "pixel_size: ---- # in µm"
         ]
         with open("params",'w') as f:
             f.write('\n'.join(params))

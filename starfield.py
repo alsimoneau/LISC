@@ -23,11 +23,12 @@ def CLI_starfield():
     print("Done.")
 
 def starfield():
-    with open("config.ini") as f:
-        config = yaml.safe_load(f)
-    psize = config['pixel size'] / 1000
-    Nx, Ny = config['resolution']
-    f = config['focal lenght']
+    with open("params") as f:
+        params = yaml.safe_load(f)
+    psize = params['pixel_size'] / 1000
+    Nx = params['width']
+    Ny = params['height']
+    f = params['focal_lenght']
 
     def align(coords,params):
         theta,phi = coords
