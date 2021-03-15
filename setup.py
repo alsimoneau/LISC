@@ -10,6 +10,7 @@ setup(
         'linearity',
         'flatfield',
         'photometry',
+        'starfield'
         'init'
         'utils'],
     install_requires=[

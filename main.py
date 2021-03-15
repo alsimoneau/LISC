@@ -16,6 +16,7 @@ functions = (
     ("linearity","CLI_linearity"),
     ("flatfield","CLI_flatfield"),
     ("photometry","CLI_photometry"),
+    ("starfield","CLI_starfield")
     ("init","init")
 )
 
