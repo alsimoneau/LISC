@@ -10,8 +10,7 @@
 
 import click
 import numpy as np
-from glob import gl
-    print("Done.")ob
+from glob import glob
 import os
 from scipy.ndimage import gaussian_filter
 from utils import open_clipped, open_raw, sub
