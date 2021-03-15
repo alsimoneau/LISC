@@ -12,12 +12,12 @@ def open_raw(fname, normalize=False):
         no_auto_bright = True,
         user_flip = 0
     )
-    with exiftool.ExifTool() as et:
-        exif = et.get_metadata(fname)
-    try:
-        exposure = float(exif['MakerNotes:SonyExposureTime'])
-    except KeyError:
-        exposure = float(exif['EXIF:ExposureTime'])
+    # with exiftool.ExifTool() as et:
+    #     exif = et.get_metadata(fname)
+    # try:
+    #     exposure = float(exif['MakerNotes:SonyExposureTime'])
+    # except KeyError:
+    #     exposure = float(exif['EXIF:ExposureTime'])
 
     if normalize:
         rgb /= 2**16 - 1
@@ -49,7 +49,7 @@ def compute_stats(fnames):
 
 def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
     if type(fnames) == str or len(fnames) == 0:
-        raise(TypeError("open_clipped expects a list of strings.")) 
+        raise(TypeError("open_clipped expects a list of strings."))
     if mean is None or stdev is None:
         print("Computing statistics...")
         mean,stdev = compute_stats(fnames)
@@ -72,3 +72,6 @@ def cosmicray_removal(image,**kwargs):
     else:
         new_data = detect_cosmics(image,**kwargs)[1]
     return new_data
+
+def sub(frame,dark):
+    return frame.astype(np.int32)-dark

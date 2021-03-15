@@ -14,6 +14,7 @@ import numpy as np
 from glob import glob
 import exiftool
 from utils import open_clipped as Open
+from utils import sub
 
 @click.command(name="linearity")
 def CLI_linearity():
@@ -31,11 +32,11 @@ def linearity():
             exif = et.get_metadata(glob(f"LINEARITY/{ss}_*")[0])
         exp = exif['MakerNotes:SonyExposureTime2']
         dark = Open(glob(f"LINEARITY/DARKS/{ss}_*"))
-        frame -= dark
+        frame = sub(frame,dark)
 
         print(exp,*frame.mean((0,1)))
         data.append((exp,*frame.mean((0,1))))
 
     data = np.asarray(data,dtype=float)
     #data = data[np.argsort(data[:,0])]
-    np.savetxt("data",data)
+    np.savetxt("linearity.dat",data)
