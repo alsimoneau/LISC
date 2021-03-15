@@ -17,6 +17,7 @@ setup(
         'Click',
         'numpy',
         'matplotlib',
+        'pyyaml',
         'pyexiftool',
         'rawpy',
         'astroscrappy@git+https://github.com/astropy/astroscrappy@master'

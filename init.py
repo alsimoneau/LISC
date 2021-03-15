@@ -28,9 +28,10 @@ def init(folder_name):
         os.makedirs(os.path.join(folder_name,fold_name,"DARKS"))
     os.makedirs(os.path.join(folder_name,"STARFIELD"))
 
-    config  = "# Config file for LISC calibration procedure\n\n"
-    config += "device model: \n"
-    config += "lens model: \n"
+    config  = ["# Config file for LISC calibration procedure"]
+    config.append("device model: ")
+    config.append("lens model: " )
+    config.append("focal lenght: # in mm" )
 
     with open(os.path.join(folder_name,"config.ini"),'w') as f:
-        f.write(config)
+        f.write('\n'.join(config))
