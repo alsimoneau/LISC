@@ -20,6 +20,7 @@ def CLI_starfield():
     """Process frames for star field calibration.
     """
     starfield()
+    print("Done.")
 
 def starfield():
     with open("config.ini") as f:

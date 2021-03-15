@@ -21,6 +21,7 @@ def CLI_linearity():
     """Process frames for linearity calibration.
     """
     linearity()
+    print("Done.")
 
 def linearity():
     set_times = { int(fname.split(os.sep)[-1].split('_')[0]) for fname in glob("LINEARITY/*.*") }

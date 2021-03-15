@@ -6,11 +6,12 @@
 # Author : Alexandre Simoneau
 #
 # Created: February 2021
-# Edited: February 2021
+# Edited: March 2021
 
 import click
 import numpy as np
-from glob import glob
+from glob import gl
+    print("Done.")ob
 import os
 from scipy.ndimage import gaussian_filter
 from utils import open_clipped, open_raw, sub
