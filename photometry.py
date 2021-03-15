@@ -10,6 +10,7 @@
 
 import click
 import numpy as np
+import pandas as pd
 import rawpy
 from glob import glob
 import os
@@ -26,21 +27,14 @@ def CLI_photometry():
 def photometry(N=10):
     dark = open_clipped("PHOTOMETRY/DARKS/*")
 
-    tots = []
-    #star = np.zeros((2*N,2*N,3))
-    #bg = np.zeros((2*N,2*N,3))
-    for fname in sorted(glob(f"PHOTOMETRY/*.*")):
+    outs = pd.DataFrame(columns=["Filename","X","Y","R","G","B"])
+    for i,fname in enumerate(sorted(glob(f"PHOTOMETRY/*.*"))):
         im = sub(open_raw(fname), dark)
         idy, idx = np.where( np.sum(im,2) == np.max(np.sum(im,2)) )
         idx, idy = idx[0], idy[0]
         print(f"Found star at: {idx}, {idy}")
-        tots.append(
-            np.sum( im[idy-N:idy+N,idx-N:idx+N], (0,1) ) -
+        rad = np.sum( im[idy-N:idy+N,idx-N:idx+N], (0,1) ) - \
             np.sum( im[idy-N:idy+N,idx-(3*N):idx-N], (0,1) )
-        )
-        #star += im[idy-N:idy+N,idx-N:idx+N]
-        #bg += im[idy-N:idy+N,idx-(3*N):idx-N]
+        outs.loc[i] = [fname[len("PHOTOMETRY/"):], idx, idy, *rad]
 
-    np.savetxt("integrated",tots)
-    #np.save("star",star)
-    #np.save("background",bg)
+    outs.to_csv("photometry.csv")
