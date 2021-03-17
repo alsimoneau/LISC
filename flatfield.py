@@ -13,7 +13,7 @@ import numpy as np
 from glob import glob
 import os
 from scipy.ndimage import gaussian_filter
-from utils import open_clipped, open_raw, sub
+from utils import open_clipped, open_raw, sub, glob_types
 
 @click.command(name="flat")
 def CLI_flatfield():
@@ -49,7 +49,7 @@ def flatfield():
     pixsixe = fov[0,fov.shape[1]//2] / (fov.shape[0]/2)
     blur = gaussian_filter(circle.astype(float),blur_radius/pixsixe)
 
-    for fname in glob("FLATFIELD/*.arw"):
+    for fname in glob_types("FLATFIELD/*"):
         foo, el, az = os.path.splitext(os.path.basename(fname))[0].split('_')
         el, az = float(el), float(az)-offset
         r = el/pixsixe

@@ -15,7 +15,7 @@ import rawpy
 from glob import glob
 import os
 import exiftool
-from utils import open_clipped, open_raw, sub
+from utils import open_clipped, open_raw, sub, glob_types
 
 @click.command(name="photo")
 def CLI_photometry():
@@ -28,7 +28,7 @@ def photometry(N=10):
     dark = open_clipped("PHOTOMETRY/DARKS/*")
 
     outs = pd.DataFrame(columns=["Filename","X","Y","R","G","B"])
-    for i,fname in enumerate(sorted(glob(f"PHOTOMETRY/*.*"))):
+    for i,fname in enumerate(sorted(glob_types(f"PHOTOMETRY/*"))):
         im = sub(open_raw(fname), dark)
         idy, idx = np.where( np.sum(im,2) == np.max(np.sum(im,2)) )
         idx, idy = idx[0], idy[0]

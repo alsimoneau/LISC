@@ -11,9 +11,10 @@
 import click
 import os
 import numpy as np
+import pandas as pd
 from glob import glob
 import exiftool
-from utils import open_clipped as Open, sub
+from utils import open_clipped as Open, sub, glob_types
 import yaml
 
 @click.command(name="lin")
@@ -35,11 +36,11 @@ def linearity(size=25):
 
     data = []
     for ss in sorted(set_times):
-        frame = Open(glob(f"LINEARITY/{ss}_*"))
+        frame = Open(f"LINEARITY/{ss}_*")
         with exiftool.ExifTool() as et:
-            exif = et.get_metadata(glob(f"LINEARITY/{ss}_*")[0])
+            exif = et.get_metadata(glob_types(f"LINEARITY/{ss}_*")[0])
         exp = exif['MakerNotes:SonyExposureTime2']
-        dark = Open(glob(f"LINEARITY/DARKS/{ss}_*"))
+        dark = Open(f"LINEARITY/DARKS/{ss}_*")
         frame = sub(frame,dark)
 
         print(exp,*frame[mask].mean(0))

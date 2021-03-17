@@ -3,6 +3,7 @@ import rawpy
 from astroscrappy import detect_cosmics
 import exiftool
 from glob import glob
+import os
 
 def open_raw(fname, normalize=False):
     print(f"Opening raw file '{fname}'")
@@ -49,11 +50,13 @@ def compute_stats(fnames):
     return mean, np.sqrt(variance)
 
 def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
-    if type(fnames) == str or len(fnames) == 0:
-        if "*" in fnames or "?" in fnames:
-            fnames = glob(fnames)
-        else:
-            raise(TypeError("open_clipped expects a list of strings."))
+    basename = ""
+    if type(fnames) == str:
+        basename = fnames.replace("*","$").replace("?","&").replace(".","!")+".npy"
+        if os.path.isfile(basename):
+            print(f"Opening {fnames} from cache")
+            return np.load(basename)
+        fnames = glob_types(fnames)
     if mean is None or stdev is None:
         print("Computing statistics...")
         mean,stdev = compute_stats(fnames)
@@ -63,7 +66,10 @@ def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
         rgb = open_raw(fname).astype(np.float64)
         rgb[np.abs(rgb-mean) > stdev*sigclip] = np.nan
         arr = np.nansum([arr,rgb],0)
-    return np.round(arr/len(fnames)).astype(np.uint16)
+    out = np.round(arr/len(fnames)).astype(np.uint16)
+    if basename:
+        np.save(basename,out)
+    return out
 
 def cosmicray_removal(image,**kwargs):
     if "sigclip" not in kwargs:
@@ -84,3 +90,6 @@ def cycle_mod(x,a=2*np.pi):
     pos = x%a
     neg = x%-a
     return np.where(np.abs(neg) < pos, neg, pos)
+
+def glob_types(pattern="*",types=["ARW","arw"]):
+    return sum( (glob(f"{pattern}.{t}") for t in types), [] )
