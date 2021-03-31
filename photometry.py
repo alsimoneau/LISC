@@ -15,7 +15,7 @@ import rawpy
 from glob import glob
 import os
 import exiftool
-from utils import open_clipped, open_raw, sub, glob_types
+from utils import *
 
 @click.command(name="photo")
 def CLI_photometry():
@@ -24,17 +24,32 @@ def CLI_photometry():
     photometry()
     print("Done.")
 
-def photometry(N=10):
+def photometry(r=10,initial=(2390,1642),drift_window=16):
     dark = open_clipped("PHOTOMETRY/DARKS/*")
 
-    outs = pd.DataFrame(columns=["Filename","X","Y","R","G","B"])
+    idx,idy = initial
+    outs = pd.DataFrame(columns=["Filename","SAT","X","Y","R","G","B","sR","sG","sB","bR","bG","bB"])
     for i,fname in enumerate(sorted(glob_types(f"PHOTOMETRY/*"))):
         im = sub(open_raw(fname), dark)
-        idy, idx = np.where( np.sum(im,2) == np.max(np.sum(im,2)) )
-        idx, idy = idx[0], idy[0]
+        crop = im[idy-drift_window:idy+drift_window,idx-drift_window:idx+drift_window]
+        y,x = np.where( np.sum(crop,2) == np.max(np.sum(crop,2)) )
+        idx += x[0] - drift_window
+        idy += y[0] - drift_window
         print(f"Found star at: {idx}, {idy}")
-        rad = np.sum( im[idy-N:idy+N,idx-N:idx+N], (0,1) ) - \
-            np.sum( im[idy-N:idy+N,idx-(3*N):idx-N], (0,1) )
-        outs.loc[i] = [fname[len("PHOTOMETRY/"):], idx, idy, *rad]
+
+        star_mask = circle_mask(idx,idy,im.shape,r)
+        star = np.sum(im[star_mask],0)
+        bgnd_mask = circle_mask(idx,idy,im.shape,2*r) \
+            & ~circle_mask(idx,idy,im.shape,1.5*r)
+        bgnd = np.sum(im[bgnd_mask],0) * np.sum(star_mask) / np.sum(bgnd_mask)
+
+        rad = star - bgnd
+
+        outs.loc[i] = [
+            fname[len("PHOTOMETRY/"):],
+            (im[star_mask] > 60000).any(),
+            idx, idy,
+            *rad, *star, *bgnd
+        ]
 
     outs.to_csv("photometry.csv")

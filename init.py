@@ -32,15 +32,6 @@ def dir(folder_name):
         os.makedirs(os.path.join(folder_name,fold_name,"DARKS"))
     os.makedirs(os.path.join(folder_name,"STARFIELD"))
 
-    config  = ["# Config file for LISC calibration procedure"]
-    config.append("device model: ")
-    config.append("lens model: " )
-    config.append("focainitl lenght: # in mm" )
-    config.append("resolution: # [X, Y]")
-    config.append("pixel size: # in µm")
-
-    with open(os.path.join(folder_name,"config.ini"),'w') as f:
-        f.write('\n'.join(config))
 
 @click.command()
 def init():
@@ -126,4 +117,4 @@ def init():
         print("Some information is missing.\n"
         "Please open the `params` file and complete as needed.")
 
-    print("Done.")
+        print("Done.")

@@ -28,7 +28,7 @@ def starfield():
     psize = params['pixel_size'] / 1000
     Nx = params['width']
     Ny = params['height']
-    f = params['focal_lenght']
+    f = params['focal_length']
 
     def align(coords,params):
         theta,phi = coords

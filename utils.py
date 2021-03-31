@@ -12,14 +12,9 @@ def open_raw(fname, normalize=False):
         gamma = (1,1),
         output_bps = 16,
         no_auto_bright = True,
-        user_flip = 0
+        user_flip = 0,
+        demosaic_algorithm = rawpy.DemosaicAlgorithm(0)
     )
-    # with exiftool.ExifTool() as et:
-    #     exif = et.get_metadata(fname)
-    # try:
-    #     exposure = float(exif['MakerNotes:SonyExposureTime'])
-    # except KeyError:
-    #     exposure = float(exif['EXIF:ExposureTime'])
 
     if normalize:
         rgb /= 2**16 - 1
@@ -93,3 +88,7 @@ def cycle_mod(x,a=2*np.pi):
 
 def glob_types(pattern="*",types=["ARW","arw"]):
     return sum( (glob(f"{pattern}.{t}") for t in types), [] )
+
+def circle_mask(x,y,shape,r):
+    Y,X = np.ogrid[:shape[0],:shape[1]]
+    return (X-x)**2 + (Y-y)**2 < r**2
