@@ -13,7 +13,7 @@ import numpy as np
 from glob import glob
 import os
 from scipy.ndimage import gaussian_filter
-from utils import open_clipped, open_raw, sub, glob_types
+from utils import *
 
 @click.command(name="flat")
 def CLI_flatfield():
@@ -57,7 +57,7 @@ def flatfield():
         y = -int(round(r * np.cos(np.deg2rad(az))))
 
         shifted = shift(blur,x,y)
-        frame = sub(open_raw(fname),dark)
+        frame = correct_linearity(sub(open_raw(fname),dark))
 
         count += shifted
         light += frame*shifted[...,None]

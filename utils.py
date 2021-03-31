@@ -4,6 +4,7 @@ from astroscrappy import detect_cosmics
 import exiftool
 from glob import glob
 import os
+import pandas as pd
 
 def open_raw(fname, normalize=False):
     print(f"Opening raw file '{fname}'")
@@ -92,3 +93,16 @@ def glob_types(pattern="*",types=["ARW","arw"]):
 def circle_mask(x,y,shape,r):
     Y,X = np.ogrid[:shape[0],:shape[1]]
     return (X-x)**2 + (Y-y)**2 < r**2
+
+def correct_linearity(data):
+    lin_data = pd.read_csv("linearity.csv")
+
+    dat = np.array([
+        np.interp(
+            data[:,:,i],
+            lin_data[band][::-1],
+            lin_data["Exposure"][::-1]
+        ) for i,band in enumerate("RGB")
+    ])
+
+    return dat.transpose(1,2,0)
