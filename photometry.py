@@ -55,8 +55,8 @@ def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
             ]
 
         outs.to_csv("photometry.csv")
-    else:
-        outs = pd.read_csv("photometry.csv")
+
+    outs = pd.read_csv("photometry.csv")
 
     with open("star_spectrum.dat",'wb') as f:
         f.write(requests.get(f"http://nartex.fis.ucm.es/~ncl/rgbphot/asciisingle/hr{star_id:04}.txt").content)
