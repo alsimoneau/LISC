@@ -66,6 +66,9 @@ def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
     wls /= 10 # A -> nm
     star *= 1e-3 # ergs / s / cm^2 -> W / m^2
 
+    with open("photometry.dat",'w'):
+        pass
+
     for band in "RGB":
         dat = outs[band][~outs['SAT']].to_numpy()
         val = np.mean(dat[ np.abs(dat - np.mean(dat)) < np.std(dat) ])
@@ -76,4 +79,5 @@ def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
 
         flux = np.trapz(star*cam_interp,wls)
 
-        print(band,flux/val)
+        with open("photometry.dat",'a') as f:
+            f.write(f"{flux/val}\n")
