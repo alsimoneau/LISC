@@ -14,6 +14,7 @@ from glob import glob
 import os
 from scipy.ndimage import gaussian_filter
 from utils import *
+import pandas as pd
 
 @click.command(name="flat")
 def CLI_flatfield():
@@ -26,6 +27,8 @@ def flatfield():
     offset = (6000 - 1320*4) / 31
     radius = 5 #degrees
     blur_radius = 1
+
+    lin_data = pd.read_csv("linearity.csv")
 
     def shift(arr,x,y):
         arr = np.roll(arr, x, 1)
@@ -57,7 +60,7 @@ def flatfield():
         y = -int(round(r * np.cos(np.deg2rad(az))))
 
         shifted = shift(blur,x,y)
-        frame = correct_linearity(sub(open_raw(fname),dark))
+        frame = correct_linearity(sub(open_raw(fname),dark),lin_data)
 
         count += shifted
         light += frame*shifted[...,None]

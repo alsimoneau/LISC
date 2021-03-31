@@ -94,8 +94,9 @@ def circle_mask(x,y,shape,r):
     Y,X = np.ogrid[:shape[0],:shape[1]]
     return (X-x)**2 + (Y-y)**2 < r**2
 
-def correct_linearity(data):
-    lin_data = pd.read_csv("linearity.csv")
+def correct_linearity(data,lin_data="linearity.csv"):
+    if type(lin_data == str):
+        lin_data = pd.read_csv(lin_data)
 
     dat = np.array([
         np.interp(
