@@ -26,36 +26,37 @@ def CLI_photometry():
     print("Done.")
 
 def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
-    if not os.path.isfile("photometry.csv"):
-        dark = open_clipped("PHOTOMETRY/DARKS/*")
+    lin_data = pd.read_csv("linearity.csv")
+    flat_data = np.load("flatfield.npy")
 
-        idx,idy = initial
-        outs = pd.DataFrame(columns=["Filename","SAT","X","Y","R","G","B","sR","sG","sB","bR","bG","bB"])
-        for i,fname in enumerate(sorted(glob_types(f"PHOTOMETRY/*"))):
-            im = sub(open_raw(fname), dark)
-            crop = im[idy-drift_window:idy+drift_window,idx-drift_window:idx+drift_window]
-            y,x = np.where( np.sum(crop,2) == np.max(np.sum(crop,2)) )
-            idx += x[0] - drift_window
-            idy += y[0] - drift_window
-            print(f"Found star at: {idx}, {idy}")
+    dark = open_clipped("PHOTOMETRY/DARKS/*")
 
-            star_mask = circle_mask(idx,idy,im.shape,r)
-            star = np.sum(im[star_mask],0)
-            bgnd_mask = circle_mask(idx,idy,im.shape,2*r) \
-                & ~circle_mask(idx,idy,im.shape,1.5*r)
-            bgnd = np.sum(im[bgnd_mask],0) * np.sum(star_mask) / np.sum(bgnd_mask)
+    idx,idy = initial
+    outs = pd.DataFrame(columns=["Filename","SAT","X","Y","R","G","B","sR","sG","sB","bR","bG","bB"])
+    for i,fname in enumerate(sorted(glob_types(f"PHOTOMETRY/*"))):
+        im = correct_flat(correct_linearity(sub(open_raw(fname), dark),lin_data),flat_data)
+        crop = im[idy-drift_window:idy+drift_window,idx-drift_window:idx+drift_window]
+        y,x = np.where( np.sum(crop,2) == np.max(np.sum(crop,2)) )
+        idx += x[0] - drift_window
+        idy += y[0] - drift_window
+        print(f"Found star at: {idx}, {idy}")
 
-            rad = star - bgnd
+        star_mask = circle_mask(idx,idy,im.shape,r)
+        star = np.sum(im[star_mask],0)
+        bgnd_mask = circle_mask(idx,idy,im.shape,2*r) \
+            & ~circle_mask(idx,idy,im.shape,1.5*r)
+        bgnd = np.sum(im[bgnd_mask],0) * np.sum(star_mask) / np.sum(bgnd_mask)
 
-            outs.loc[i] = [
-                fname[len("PHOTOMETRY/"):],
-                (im[star_mask] > 60000).any(),
-                idx, idy,
-                *rad, *star, *bgnd
-            ]
+        rad = star - bgnd
 
-        outs.to_csv("photometry.csv")
+        outs.loc[i] = [
+            fname[len("PHOTOMETRY/"):],
+            (im[star_mask] > 60000).any(),
+            idx, idy,
+            *rad, *star, *bgnd
+        ]
 
+    outs.to_csv("photometry.csv")
     outs = pd.read_csv("photometry.csv")
 
     with open("star_spectrum.dat",'wb') as f:

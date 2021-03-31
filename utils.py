@@ -95,7 +95,7 @@ def circle_mask(x,y,shape,r):
     return (X-x)**2 + (Y-y)**2 < r**2
 
 def correct_linearity(data,lin_data="linearity.csv"):
-    if type(lin_data == str):
+    if type(lin_data) == str:
         lin_data = pd.read_csv(lin_data)
 
     dat = np.array([
@@ -107,3 +107,9 @@ def correct_linearity(data,lin_data="linearity.csv"):
     ])
 
     return dat.transpose(1,2,0)
+
+def correct_flat(data,flat_data="flatfield.npy"):
+    if type(flat_data) == str:
+        flat_data = np.load(flat_data)
+
+    return data / (flat_data / flat_data.max((0,1)))
