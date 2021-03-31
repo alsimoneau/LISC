@@ -10,8 +10,9 @@ setup(
         'linearity',
         'flatfield',
         'photometry',
-        'starfield'
-        'init'
+        'starfield',
+        'calib',
+        'init',
         'utils'],
     install_requires=[
         'Click',
