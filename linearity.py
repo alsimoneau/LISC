@@ -6,7 +6,7 @@
 # Author : Alexandre Simoneau
 #
 # Created: February 2021
-# Edited: March 2021
+# Edited: April 2021
 
 import click
 import os
@@ -24,6 +24,7 @@ def CLI_linearity():
     linearity()
     print("Done.")
 
+# TODO: Add parameter to CLI
 def linearity(size=25):
     set_times = { int(fname.split(os.sep)[-1].split('_')[0]) for fname in glob("LINEARITY/*.*") }
 

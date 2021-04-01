@@ -25,6 +25,8 @@ def CLI_photometry():
     photometry()
     print("Done.")
 
+# TODO: Add parameters to CLI
+# TODO: Use astrometry for star identification
 def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
     lin_data = pd.read_csv("linearity.csv")
     flat_data = np.load("flatfield.npy")

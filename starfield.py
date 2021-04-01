@@ -6,7 +6,7 @@
 # Author : Alexandre Simoneau
 #
 # Created: March 2021
-# Edited: March 2021
+# Edited: April 2021
 
 import click
 import numpy as np
@@ -22,6 +22,7 @@ def CLI_starfield():
     starfield()
     print("Done.")
 
+# TODO: Generalize (astrometry?)
 def starfield():
     with open("params") as f:
         params = yaml.safe_load(f)

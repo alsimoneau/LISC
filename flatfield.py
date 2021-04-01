@@ -6,7 +6,7 @@
 # Author : Alexandre Simoneau
 #
 # Created: February 2021
-# Edited: March 2021
+# Edited: April 2021
 
 import click
 import numpy as np
@@ -23,6 +23,8 @@ def CLI_flatfield():
     flatfield()
     print("Done.")
 
+# TODO: Add parameters to CLI
+# TODO: Generalize
 def flatfield():
     offset = (6000 - 1320*4) / 31
     radius = 5 #degrees
