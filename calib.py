@@ -31,7 +31,8 @@ def calib(images,darks):
     photo = np.loadtxt("photometry.dat")
 
     for fname in images:
-        data = correct_flat(correct_linearity(sub(open_raw(fname),dark),lin_data),flat_data)
+        im = cosmicray_removal(sub(open_raw(fname),dark))
+        data = correct_flat(correct_linearity(im,lin_data),flat_data)
         data *= photo
 
         np.save(fname.rsplit('.',1)[0], data)
