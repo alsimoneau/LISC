@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from glob import glob
 import os
+import exiftool
 from utils import *
 
 @click.command(name="calib")
@@ -31,8 +32,12 @@ def calib(images,darks):
     photo = np.loadtxt("photometry.dat")
 
     for fname in images:
+        with exiftool.ExifTool() as et:
+            exif = et.get_metadata(fname)
+        exp = exif['MakerNotes:SonyExposureTime2']
+
         im = cosmicray_removal(sub(open_raw(fname),dark))
         data = correct_flat(correct_linearity(im,lin_data),flat_data)
-        data *= photo
+        data *= photo / exp
 
         np.save(fname.rsplit('.',1)[0], data)

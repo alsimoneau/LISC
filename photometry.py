@@ -30,7 +30,7 @@ def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
     flat_data = np.load("flatfield.npy")
 
     dark = open_clipped("PHOTOMETRY/DARKS/*")
-
+    
     idx,idy = initial
     outs = pd.DataFrame(columns=["Filename","SAT","X","Y","R","G","B","sR","sG","sB","bR","bG","bB"])
     for i,fname in enumerate(sorted(glob_types(f"PHOTOMETRY/*"))):
@@ -59,6 +59,10 @@ def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
     outs.to_csv("photometry.csv")
     outs = pd.read_csv("photometry.csv")
 
+    with exiftool.ExifTool() as et:
+        exif = et.get_metadata(glob_types("PHOTOMETRY/*")[0])
+    exp = exif['MakerNotes:SonyExposureTime2']
+
     with open("star_spectrum.dat",'wb') as f:
         f.write(requests.get(f"http://nartex.fis.ucm.es/~ncl/rgbphot/asciisingle/hr{star_id:04}.txt").content)
 
@@ -70,7 +74,7 @@ def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
         pass
 
     for band in "RGB":
-        dat = outs[band][~outs['SAT']].to_numpy()
+        dat = outs[band][~outs['SAT']].to_numpy() / exp
         val = np.mean(dat[ np.abs(dat - np.mean(dat)) < np.std(dat) ])
 
         wlc,cam = np.loadtxt(f"{band}.spct").T
