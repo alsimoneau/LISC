@@ -18,7 +18,7 @@ from utils import *
 
 @click.command(name="calib")
 @click.argument("images")
-@click.argument("darks",required=True,nargs=-1)
+@click.argument("darks",nargs=-1)
 def CLI_calib(images,darks):
     """Image calibration.
     """
@@ -34,7 +34,7 @@ def calib(images,darks):
     for fname in images:
         with exiftool.ExifTool() as et:
             exif = et.get_metadata(fname)
-        exp = exif['MakerNotes:SonyExposureTime2']
+        exp = float(exif['MakerNotes:SonyExposureTime2'])
 
         im = cosmicray_removal(sub(open_raw(fname),dark))
         data = correct_flat(correct_linearity(im,lin_data),flat_data)
