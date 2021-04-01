@@ -6,7 +6,7 @@
 # Author : Alexandre Simoneau
 #
 # Created: February 2021
-# Edited: March 2021
+# Edited: April 2021
 
 import click
 import numpy as np

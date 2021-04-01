@@ -6,7 +6,7 @@
 # Author : Alexandre Simoneau
 #
 # Created: March 2021
-# Edited: March 2021
+# Edited: April 2021
 
 import click
 import numpy as np
@@ -17,19 +17,21 @@ import exiftool
 from utils import *
 
 @click.command(name="calib")
+@click.argument("cam_key")
 @click.argument("images")
 @click.argument("darks",nargs=-1)
-def CLI_calib(images,darks):
+def CLI_calib(cam_key,images,darks):
     """Image calibration.
     """
-    calib(glob(os.path.expanduser(images)),darks)
+    calib(cam_key,glob(os.path.expanduser(images)),darks)
     print("Done.")
 
-def calib(images,darks):
-    lin_data = pd.read_csv("linearity.csv")
-    flat_data = np.load("flatfield.npy")
+def calib(cam_key,images,darks):
+    datadir = os.path.expanduser(f"~/.LISC/{cam_key}/")
+    lin_data = pd.read_csv(datadir+"linearity.csv")
+    flat_data = np.load(datadir+"flatfield.npy")
     dark = open_clipped(darks)
-    photo = np.loadtxt("photometry.dat")
+    photo = np.loadtxt(datadir+"photometry.dat")
 
     for fname in images:
         with exiftool.ExifTool() as et:

@@ -6,7 +6,7 @@
 # Author : Alexandre Simoneau
 #
 # Created: February 2021
-# Edited: March 2021
+# Edited: April 2021
 
 import click
 import os
@@ -14,6 +14,7 @@ import exiftool
 from glob import glob
 import pandas as pd
 import yaml
+import shutil
 
 @click.command()
 @click.argument('folder_name', type=click.Path(exists=False), default='.')
@@ -104,6 +105,7 @@ def init():
             exif = et.get_metadata(fname)
 
         params = [
+            f"camera_reference_name: ----",
             f"camera: {exif['EXIF:Make']} {exif['EXIF:Model']}",
             f"height: {exif['MakerNotes:SonyImageHeightMax']}",
             f"width: {exif['MakerNotes:SonyImageWidthMax']}",
@@ -118,3 +120,57 @@ def init():
         "Please open the `params` file and complete as needed.")
 
         print("Done.")
+
+@click.command()
+def save():
+    "Saves calibration files"
+    datafiles = [
+        "params",
+        "geometry.npy",
+        "linearity.csv",
+        "flatfield.npy",
+        "flat_weight.npy",
+        "photometry.csv",
+        "photometry.dat"
+    ]
+
+    error = False
+    for fname in datafiles:
+        if not os.path.isfile(fname):
+            print(f"ERROR: {fname} is missing")
+            error = True
+
+    if error:
+        print("Error detected, aborting.")
+        return()
+
+    with open("params") as f:
+        params = yaml.safe_load(f)
+    cam_key = params['camera_reference_name']
+
+    if os.path.isdir(os.path.expanduser(f"~/.LISC/{cam_key}")):
+        flag = input(f"Data for {cam_key} already found, overwrite ? [Y/n] ")
+        if flag[0] in "Nn":
+            print("Aborting.")
+            return()
+
+    datadir = os.path.expanduser(f"~/.LISC/{cam_key}/")
+    print("Creating "+datadir)
+    os.makedirs(datadir)
+    for fname in datafiles:
+        shutil.copy(fname,datadir+fname)
+
+    print("Done.")
+
+@click.command()
+def list():
+    "List calibrated cameras"
+
+    for param_file in glob(os.path.expanduser("~/.LISC/*/params")):
+        with open(param_file) as f:
+            params = yaml.safe_load(f)
+
+        print(f"{params['camera_reference_name']}\n"
+            f"   Camera body: {params['camera']}\n"
+            f"    Lens model: {params['lens']}\n"
+        )

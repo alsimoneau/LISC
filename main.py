@@ -19,7 +19,9 @@ functions = (
     ("starfield","CLI_starfield"),
     ("calib","CLI_calib"),
     ("init","dir"),
-    ("init","init")
+    ("init","init"),
+    ("init","save"),
+    ("init","list")
 )
 
 for module_name,method in functions:
