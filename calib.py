@@ -9,14 +9,29 @@
 # Edited: March 2021
 
 import click
+import numpy as np
+import pandas as pd
+from glob import glob
+import os
 from utils import *
 
 @click.command(name="calib")
-def CLI_process():
+@click.argument("images")
+@click.argument("darks",required=True,nargs=-1)
+def CLI_calib(images,darks):
     """Image calibration.
     """
-    calib()
+    calib(glob(os.path.expanduser(images)),darks)
     print("Done.")
 
-def calib(fname):
-  pass
+def calib(images,darks):
+    lin_data = pd.read_csv("linearity.csv")
+    flat_data = np.load("flatfield.npy")
+    dark = open_clipped(darks)
+    photo = np.loadtxt("photometry.dat")
+
+    for fname in images:
+        data = correct_flat(correct_linearity(sub(open_raw(fname),dark),lin_data),flat_data)
+        data *= photo
+
+        np.save(fname.rsplit('.',1)[0], data)
