@@ -27,7 +27,8 @@ def CLI_photometry():
 
 # TODO: Add parameters to CLI
 # TODO: Use astrometry for star identification
-def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
+def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819,
+    aod=0.074,alpha=0.978,theta=58.,alt=319,alt_aod=251,alt_p=241,press=99.3):
     lin_data = pd.read_csv("linearity.csv")
     flat_data = np.load("flatfield.npy")
 
@@ -72,6 +73,12 @@ def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
     wls /= 10 # A -> nm
     star *= 1e-2 # ergs / s / cm^2 / A -> W / m^2 / nm
 
+    Tm = np.exp( -(press/101.3) / ( (wls/1000)**4 * 115.6406 - (wls/1000)**2 * 1.335) )
+    Tm_inf = Tm ** ( np.exp( -(alt-alt_p)/2000 ) / np.cos(theta) )
+
+    Ta = np.exp( -aod * (wls/500)**(-alpha) )
+    Ta_inf = Ta ** ( np.exp( -(alt-alt_aod)/2000 ) / np.cos(theta) )
+
     with open("photometry.dat",'w'):
         pass
 
@@ -83,7 +90,7 @@ def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819):
         cam /= np.max(cam) # max => 1
         cam_interp = np.interp(wls,wlc,cam)
 
-        flux = np.trapz(star*cam_interp,wls)
+        flux = np.trapz(Tm_inf*Ta_inf*star*cam_interp,wls)
 
         with open("photometry.dat",'a') as f:
             f.write(f"{flux/val}\n")
