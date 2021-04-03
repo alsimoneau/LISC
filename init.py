@@ -148,13 +148,15 @@ def save():
         params = yaml.safe_load(f)
     cam_key = params['camera_reference_name']
 
-    if os.path.isdir(os.path.expanduser(f"~/.LISC/{cam_key}")):
+    datadir = os.path.expanduser(f"~/.LISC/{cam_key}/")
+
+    if os.path.isdir(datadir):
         flag = input(f"Data for {cam_key} already found, overwrite ? [Y/n] ")
-        if flag[0] in "Nn":
+        if len(flag) > 1 and flag[0] in "Nn":
             print("Aborting.")
             return()
+        shutil.rmtree(datadir)
 
-    datadir = os.path.expanduser(f"~/.LISC/{cam_key}/")
     print("Creating "+datadir)
     os.makedirs(datadir)
     for fname in datafiles:
