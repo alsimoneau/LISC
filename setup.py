@@ -23,6 +23,7 @@ setup(
         'scipy',
         'pyexiftool',
         'rawpy',
+        'imageio',
         'astroscrappy@git+https://github.com/astropy/astroscrappy@master'
     ],
     entry_points='''

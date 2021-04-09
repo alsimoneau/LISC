@@ -15,6 +15,7 @@ from glob import glob
 import os
 import exiftool
 from utils import *
+import imageio
 
 @click.command(name="calib")
 @click.argument("cam_key")
@@ -27,7 +28,8 @@ def CLI_calib(cam_key,images,darks):
     print("Done.")
 
 # TODO: Add cosmicray parameters to CLI
-def calib(cam_key,images,darks):
+# TODO: Add output format selector
+def calib(cam_key,images,darks,fmt="tif"):
     datadir = os.path.expanduser(f"~/.LISC/{cam_key}/")
     lin_data = pd.read_csv(datadir+"linearity.csv")
     flat_data = np.load(datadir+"flatfield.npy")
@@ -43,4 +45,7 @@ def calib(cam_key,images,darks):
         data = correct_flat(correct_linearity(im,lin_data),flat_data)
         data *= photo / exp
 
-        np.save(fname.rsplit('.',1)[0], data)
+        if fmt=="npy":
+            np.save(fname.rsplit('.',1)[0], data)
+        elif fmt=="tif":
+            imageio.imsave(fname.rsplit('.',1)[0]+".tiff", data)
