@@ -18,13 +18,14 @@ from utils import open_clipped as Open, sub, glob_types
 import yaml
 
 @click.command(name="lin")
-def CLI_linearity():
+@click.option('-s',"--size",type=float,default=25,
+    help="Size of the window to process. (Default: 25)")
+def CLI_linearity(size):
     """Process frames for linearity calibration.
     """
-    linearity()
+    linearity(size)
     print("Done.")
 
-# TODO: Add parameter to CLI
 def linearity(size=25):
     set_times = { int(fname.split(os.sep)[-1].split('_')[0]) for fname in glob("LINEARITY/*.*") }
 
