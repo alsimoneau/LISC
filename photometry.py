@@ -19,13 +19,38 @@ from utils import *
 import requests
 
 @click.command(name="photo")
-def CLI_photometry():
+@click.argument("id",type=int,required=True)
+@click.argument("radius",type=float,default=10)
+@click.option('-i',"--initial",type=(float,float),help="Initial star position in pixels. (X,Y)")
+@click.option('-d',"--drift_window",type=float,default=16,help="Size of the window to look for the star each frame. Used to compensate for drift due to earth's rotation. (Default: 16)")
+@click.option('-z',"--theta",type=float,required=True,help="Zenith angle of the star")
+@click.option('-t',"--aod",type=float,required=True,help="Aerosol optical depth. Obtained from AERONET station.")
+@click.option('-a',"--alpha",type=float,required=True,help="Angstrom coefficient. Obtained from AERONET station.")
+@click.option('-p',"--pressure",type=float,default=101.3,help="Air pressure. (Default: 1atm)")
+@click.option('-h',"--alt",type=float,default=0,help="Altitude of the measurement site. (Default: 0m)")
+@click.option('--alt_aod',type=float,required=False,help="Altitude of the AERONET station used. (Default: alt)")
+@click.option("--alt_p",type=float,required=False,help="Altitude of the site where the pressure was measured. (Default: alt)")
+def CLI_photometry(radius,id,initial,drift_window,aod,alpha,theta,pressure,alt,alt_aod,alt_p):
     """Process frames for stellar photometry calibration.
+
+    Integrates the stellar flux using a disk of radius RADIUS pixels.
+    The star used is identified by it's ID in the Yale Bright Star Catalog.
     """
-    photometry()
+    photometry(
+        r=radius,
+        star_id=id,
+        initial=initial,
+        drift_window=drift_window,
+        aod=aod,
+        alpha=alpha,
+        theta=theta,
+        alt=alt,
+        alt_aod=alt_aod,
+        alt_p=alt_p,
+        press=pressure
+    )
     print("Done.")
 
-# TODO: Add parameters to CLI
 # TODO: Use astrometry for star identification
 def photometry(r=10,initial=(2390,1642),drift_window=16,star_id=8819,
     aod=0.074,alpha=0.978,theta=58.,alt=319,alt_aod=251,alt_p=241,press=99.3):

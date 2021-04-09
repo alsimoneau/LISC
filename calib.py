@@ -41,7 +41,6 @@ def CLI_calib(cam_key,images,darks,format,sigma):
     )
     print("Done.")
 
-# TODO: Add cosmicray parameters to CLI
 def calib(cam_key,images,darks,fmt="npy",sigclip=5):
     datadir = os.path.expanduser(f"~/.LISC/{cam_key}/")
     lin_data = pd.read_csv(datadir+"linearity.csv")
