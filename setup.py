@@ -4,16 +4,12 @@ setup(
     name='LISC',
     version='0.1.1',
     description="Low Intensity Sensor Calibration",
+    url="https://github.com/alsimoneau/lisc",
     author="Alexandre Simoneau",
-    py_modules=[
-        'main',
-        'linearity',
-        'flatfield',
-        'photometry',
-        'starfield',
-        'calib',
-        'init',
-        'utils'],
+    author_email="alsimoneau@gmail.com",
+    liscence="MIT",
+    packages=['lisc'],
+    zip_safe=False,
     install_requires=[
         'Click',
         'numpy',
@@ -28,6 +24,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        lisc=main:lisc
+        lisc=lisc.main:lisc
     ''',
 )

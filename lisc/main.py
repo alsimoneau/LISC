@@ -13,15 +13,15 @@ def lisc():
     pass # Entry point
 
 functions = (
-    ("linearity","CLI_linearity"),
-    ("flatfield","CLI_flatfield"),
-    ("photometry","CLI_photometry"),
-    ("starfield","CLI_starfield"),
-    ("calib","CLI_calib"),
-    ("init","dir"),
-    ("init","init"),
-    ("init","save"),
-    ("init","list")
+    ("lisc.linearity","CLI_linearity"),
+    ("lisc.flatfield","CLI_flatfield"),
+    ("lisc.photometry","CLI_photometry"),
+    ("lisc.starfield","CLI_starfield"),
+    ("lisc.calib","CLI_calib"),
+    ("lisc.init","dir"),
+    ("lisc.init","init"),
+    ("lisc.init","save"),
+    ("lisc.init","list")
 )
 
 for module_name,method in functions:

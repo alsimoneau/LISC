@@ -13,7 +13,7 @@ import numpy as np
 from glob import glob
 import os
 from scipy.ndimage import gaussian_filter
-from utils import *
+from lisc.utils import *
 import pandas as pd
 
 @click.command(name="flat")

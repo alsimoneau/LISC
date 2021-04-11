@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit, leastsq
 import yaml
-from utils import cycle_mod
+from lisc.utils import cycle_mod
 
 @click.command(name="geo")
 def CLI_starfield():
