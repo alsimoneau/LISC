@@ -15,7 +15,7 @@ import rawpy
 from glob import glob
 import os
 import exiftool
-from lisc.utils import *
+from .utils import *
 import requests
 
 @click.command(name="photo")

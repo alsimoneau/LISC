@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from glob import glob
 import exiftool
-from lisc.utils import open_clipped as Open, sub, glob_types
+from .utils import open_clipped as Open, sub, glob_types
 import yaml
 
 @click.command(name="lin")

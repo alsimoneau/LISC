@@ -14,7 +14,7 @@ import pandas as pd
 from glob import glob
 import os
 import exiftool
-from lisc.utils import *
+from .utils import *
 import imageio
 
 @click.command(name="calib")
