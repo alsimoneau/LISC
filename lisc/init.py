@@ -14,6 +14,7 @@ import exiftool
 from glob import glob
 import pandas as pd
 import yaml
+import inspect
 import shutil
 
 @click.command()
@@ -32,6 +33,21 @@ def dir(folder_name):
     for fold_name in folders:
         os.makedirs(os.path.join(folder_name,fold_name,"DARKS"))
     os.makedirs(os.path.join(folder_name,"STARFIELD"))
+
+    txt = [
+        "star_id: 0           # Star's ID in the Yale Bright Star Catalog",
+        "star_position: [0,0] # Initial star position in pixels (X,Y)",
+        "theta: 90            # Zenith angle of the star [deg]",
+        "aod: 1.0             # Aerosol optical depth",
+        "alpha: 1.0           # Angstrom coefficient",
+        "pressure: 101.3      # Air pressure [kPa]",
+        "altitude: 0          # Altitude of the measurement site [m]",
+        "altitude_aod: 0      # Altitude of the AERONET station used [m]",
+        "altitude_pressure: 0 # Altitude of the site where the pressure was measured [m]"
+    ]
+
+    with open("PHOTOMETRY/photometry.params",'w') as f:
+        f.write('\n'.join(txt))
 
 
 @click.command()

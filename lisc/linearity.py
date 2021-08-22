@@ -18,7 +18,7 @@ from .utils import open_clipped as Open, sub, glob_types
 import yaml
 
 @click.command(name="lin")
-@click.option('-s',"--size",type=float,default=25,
+@click.option('-s',"--size",type=int,default=25,
     help="Size of the window to process. (Default: 25)")
 def CLI_linearity(size):
     """Process frames for linearity calibration.

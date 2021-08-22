@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='LISC',
-    version='0.1.1',
+    version='0.1.2',
     description="Low Intensity Sensor Calibration",
     url="https://github.com/alsimoneau/lisc",
     author="Alexandre Simoneau",
@@ -20,6 +20,7 @@ setup(
         'pyexiftool',
         'rawpy',
         'imageio',
+        'requests',
         'astroscrappy@git+https://github.com/astropy/astroscrappy@master'
     ],
     entry_points='''
