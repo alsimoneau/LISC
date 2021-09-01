@@ -18,6 +18,7 @@ import exiftool
 from .utils import *
 import yaml
 import requests
+from progressbar import progressbar
 
 @click.command(name="photo")
 @click.option("-r","--radius",type=float,default=10)
@@ -56,7 +57,9 @@ def photometry(r=10,drift_window=16):
 
     idx,idy = initial
     outs = pd.DataFrame(columns=["Filename","SAT","X","Y","R","G","B","sR","sG","sB","bR","bG","bB"])
-    for i,fname in enumerate(sorted(glob_types(f"PHOTOMETRY/*"))):
+
+
+    for fname in progressbar(sorted(glob_types(f"PHOTOMETRY/*")),redirect_stdout=True):
         im = correct_flat(correct_linearity(sub(open_raw(fname), dark),lin_data),flat_data)
         crop = im[idy-drift_window:idy+drift_window,idx-drift_window:idx+drift_window]
         y,x = np.where( np.sum(crop,2) == np.max(np.sum(crop,2)) )
@@ -72,7 +75,7 @@ def photometry(r=10,drift_window=16):
 
         rad = star - bgnd
 
-        outs.loc[i] = [
+        outs.loc[len(outs)] = [
             fname[len("PHOTOMETRY/"):],
             (im[star_mask] > 60000).any(),
             idx, idy,

@@ -4,6 +4,7 @@ from astroscrappy import detect_cosmics as _detect_cosmics
 from glob import glob as _glob
 import os as _os
 import pandas as _pd
+from exiftool import ExifTool as _ExifTool
 
 def open_raw(fname, normalize=False):
     print(f"Opening raw file '{fname}'")
@@ -20,6 +21,40 @@ def open_raw(fname, normalize=False):
         rgb /= 2**16 - 1
 
     return rgb
+
+def exif_read(fname,raw=False):
+    with _ExifTool() as et:
+        exif = et.get_metadata(fname)
+
+    if raw:
+        return exif
+
+    gen = [
+        "Make","Model","LensModel",
+        "ImageWidth", "ImageHeight",
+        "ExposureTime", "ISO",
+        "ShutterSpeedValue"
+    ]
+    keys = { k:"EXIF:"+k for k in gen }
+
+    make = exif[keys['Make']]
+    if make == "SONY":
+        maker = {
+            "ShutterSpeedValue" : "MakerNotes:SonyExposureTime2",
+            "ImageHeight" : "MakerNotes:SonyImageHeightMax",
+            "ImageWidth" : "MakerNotes:SonyImageWidthMax"
+        }
+    elif make == "DJI":
+        maker = {
+            "LensModel" : None
+        }
+
+    keys.update(maker)
+    info = { k : exif[v] if v is not None else '----' \
+        for k,v in keys.items() }
+
+    return info
+
 
 def compute_stats(fnames):
     # Taken from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
