@@ -18,7 +18,7 @@ def open_raw(fname, normalize=False):
     )
 
     if normalize:
-        rgb /= 2**16 - 1
+        rgb = rgb / (2**16 - 1)
 
     return rgb
 
