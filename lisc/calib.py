@@ -42,6 +42,10 @@ def CLI_calib(cam_key,images,darks,format,sigma):
     print("Done.")
 
 def calib(cam_key,images,darks,fmt="npy",sigclip=5):
+    if fmt not in ["npy","tif"]:
+        print(f"ERROR: Unrecognized format '{fmt}'")
+        return
+        
     datadir = os.path.expanduser(f"~/.LISC/{cam_key}/")
     lin_data = pd.read_csv(datadir+"linearity.csv")
     flat_data = np.load(datadir+"flatfield.npy")

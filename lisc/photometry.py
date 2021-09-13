@@ -85,9 +85,7 @@ def photometry(r=10,drift_window=16):
     outs.to_csv("photometry.csv")
     outs = pd.read_csv("photometry.csv")
 
-    with exiftool.ExifTool() as et:
-        exif = et.get_metadata(glob_types("PHOTOMETRY/*")[0])
-    exp = float(exif['MakerNotes:SonyExposureTime2'])
+    exp = exif_read(glob_types("PHOTOMETRY/*")[0])['ShutterSpeedValue']
 
     with open("star_spectrum.dat",'wb') as f:
         f.write(requests.get(f"http://nartex.fis.ucm.es/~ncl/rgbphot/asciisingle/hr{star_id:04}.txt").content)
