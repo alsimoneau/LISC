@@ -94,11 +94,12 @@ def photometry(r=10,drift_window=16):
     wls /= 10 # A -> nm
     star *= 1e-2 # ergs / s / cm^2 / A -> W / m^2 / nm
 
-    Tm = np.exp( -(press/101.3) / ( (wls/1000)**4 * 115.6406 - (wls/1000)**2 * 1.335) )
-    Tm_inf = Tm ** ( np.exp( -(alt-alt_p)/2000 ) / np.cos(theta) )
+    Tm_inf = np.exp( -(press/101.3) / ( (wls/1000)**4 * 115.6406 - (wls/1000)**2 * 1.335) )
+    Tm = Tm_inf ** ( np.exp( -(alt-alt_p)/8000 ) / np.cos(theta) )
 
-    Ta = np.exp( -aod * (wls/500)**(-alpha) )
-    Ta_inf = Ta ** ( np.exp( -(alt-alt_aod)/2000 ) / np.cos(theta) )
+    Ta_aod = np.exp( -aod * (wls/500)**(-alpha) )
+    Ta_inf = Ta_aod ** ( -np.exp( -alt_aod/2000 ) )
+    Ta = Ta_inf ** ( np.exp( -alt/2000 ) / np.cos(theta) )
 
     with open("photometry.dat",'w'):
         pass
@@ -111,7 +112,7 @@ def photometry(r=10,drift_window=16):
         cam /= np.max(cam) # max => 1
         cam_interp = np.interp(wls,wlc,cam)
 
-        flux = np.trapz(Tm_inf*Ta_inf*star*cam_interp,wls)
+        flux = np.trapz(Tm*Ta*star*cam_interp,wls)
 
         with open("photometry.dat",'a') as f:
             f.write(f"{flux/val}\n")

@@ -67,8 +67,8 @@ def starfield():
     p1,foo = curve_fit( radial, alt, theta2 )
     alt2 = radial(alt, *p1)
 
-    x = np.arange(Nx,dtype=float) - Nx/2
-    y = Ny/2 - np.arange(Ny,dtype=float)
+    x = np.arange(Nx,dtype=float) - Nx/2 + 0.5
+    y = Ny/2 - np.arange(Ny,dtype=float) + 0.5
     xx,yy = np.meshgrid(x,y)
     r = np.sqrt( xx**2 + yy**2 )
     r2 = radial( np.arctan( psize * r / f ), *p1 )
