@@ -21,8 +21,8 @@ import requests
 from progressbar import progressbar
 
 @click.command(name="photo")
-@click.option("-r","--radius",type=float,default=10)
-@click.option("-w","--drift-window",type=int,default=16)
+@click.option("-r","--radius",type=float,default=50)
+@click.option("-w","--drift-window",type=int,default=200)
 def CLI_photometry(radius,drift_window):
     """Process frames for stellar photometry calibration.
 
@@ -37,14 +37,14 @@ def CLI_photometry(radius,drift_window):
     print("Done.")
 
 # TODO: Use astrometry for star identification
-def photometry(r=10,drift_window=16):
+def photometry(r=50,drift_window=200):
     with open("PHOTOMETRY/photometry.params") as f:
         p = yaml.safe_load(f)
     star_id=p["star_id"]
     initial=p["star_position"]
     aod=p["aod"]
     alpha=p["alpha"]
-    theta=p["theta"]
+    theta=np.deg2rad(p["theta"])
     alt=p["altitude"]
     alt_aod=p["altitude_aod"]
     alt_p=p["altitude_pressure"]
@@ -60,25 +60,32 @@ def photometry(r=10,drift_window=16):
 
 
     for fname in progressbar(sorted(glob_types(f"PHOTOMETRY/*")),redirect_stdout=True):
-        im = correct_flat(correct_linearity(sub(open_raw(fname), dark),lin_data),flat_data)
+        im = sub(open_raw(fname), dark)
+
         crop = im[idy-drift_window:idy+drift_window,idx-drift_window:idx+drift_window]
-        y,x = np.where( np.sum(crop,2) == np.max(np.sum(crop,2)) )
-        idx += x[0] - drift_window
-        idy += y[0] - drift_window
+        ys,xs = np.where( np.mean(crop,2) > np.max(crop)/2 )
+        x = ( min(xs)+max(xs) )//2
+        y = ( min(ys)+max(ys) )//2
+
+        idx += x - drift_window
+        idy += y - drift_window
         print(f"Found star at: {idx}, {idy}")
 
         star_mask = circle_mask(idx,idy,im.shape,r)
-        star = np.sum(im[star_mask],0)
         bgnd_mask = circle_mask(idx,idy,im.shape,2*r) \
             & ~circle_mask(idx,idy,im.shape,1.5*r)
+
+        sat = (im[star_mask] > 60000).any()
+        im = correct_flat(correct_linearity(im,lin_data),flat_data)
+
+        star = np.sum(im[star_mask],0)
         bgnd = np.sum(im[bgnd_mask],0) * np.sum(star_mask) / np.sum(bgnd_mask)
 
         rad = star - bgnd
 
         outs.loc[len(outs)] = [
             fname[len("PHOTOMETRY/"):],
-            (im[star_mask] > 60000).any(),
-            idx, idy,
+            sat, idx, idy,
             *rad, *star, *bgnd
         ]
 
