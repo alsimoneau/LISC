@@ -21,6 +21,7 @@ setup(
         'rawpy',
         'imageio',
         'requests',
+        'progressbar2',
         'astroscrappy@git+https://github.com/astropy/astroscrappy@master'
     ],
     entry_points='''
