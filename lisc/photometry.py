@@ -19,6 +19,7 @@ from .utils import *
 import yaml
 import requests
 from progressbar import progressbar
+from scipy.ndimage import gaussian_filter
 
 @click.command(name="photo")
 @click.option("-r","--radius",type=float,default=50)
@@ -58,17 +59,16 @@ def photometry(r=50,drift_window=200):
     idx,idy = initial
     outs = pd.DataFrame(columns=["Filename","SAT","X","Y","R","G","B","sR","sG","sB","bR","bG","bB"])
 
-
     for fname in progressbar(sorted(glob_types(f"PHOTOMETRY/*")),redirect_stdout=True):
         im = sub(open_raw(fname), dark)
 
         crop = im[idy-drift_window:idy+drift_window,idx-drift_window:idx+drift_window]
-        ys,xs = np.where( np.mean(crop,2) > np.max(crop)/2 )
-        x = ( min(xs)+max(xs) )//2
-        y = ( min(ys)+max(ys) )//2
 
-        idx += x - drift_window
-        idy += y - drift_window
+        blurred = gaussian_filter(crop.mean(2),r,mode="constant")
+        y,x = np.where(blurred == blurred.max())
+
+        idx += x[0] - drift_window
+        idy += y[0] - drift_window
         print(f"Found star at: {idx}, {idy}")
 
         star_mask = circle_mask(idx,idy,im.shape,r)

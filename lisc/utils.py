@@ -23,6 +23,17 @@ def open_raw(fname, normalize=False):
     return rgb
 
 def exif_read(fname,raw=False):
+    def safe_float(x):
+        try:
+           a = float(x)
+        except ValueError:
+           a = x
+        else:
+           if a == int(a):
+               a = int(a)
+        return a
+
+
     with _ExifTool() as et:
         exif = et.get_metadata(fname)
 
@@ -50,7 +61,7 @@ def exif_read(fname,raw=False):
         }
 
     keys.update(maker)
-    info = { k : exif[v] if v is not None else '----' \
+    info = { k : safe_float(exif[v]) if v is not None else '----' \
         for k,v in keys.items() }
 
     return info
