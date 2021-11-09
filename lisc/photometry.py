@@ -89,9 +89,6 @@ def photometry(r=50,drift_window=200):
             *rad, *star, *bgnd
         ]
 
-    outs.to_csv("photometry.csv")
-    outs = pd.read_csv("photometry.csv")
-
     exp = exif_read(glob_types("PHOTOMETRY/*")[0])['ShutterSpeedValue']
 
     with open("star_spectrum.dat",'wb') as f:
@@ -113,7 +110,7 @@ def photometry(r=50,drift_window=200):
         pass
 
     for band in "RGB":
-        dat = outs[band][~outs['SAT']].to_numpy() / exp
+        dat = outs[band][~outs['SAT'].astype(bool)].to_numpy() / exp
         val = np.mean(dat[ np.abs(dat - np.mean(dat)) < np.std(dat) ])
 
         wlc,cam = np.loadtxt(f"{band}.spct").T
@@ -124,3 +121,6 @@ def photometry(r=50,drift_window=200):
 
         with open("photometry.dat",'a') as f:
             f.write(f"{flux/val}\n")
+
+        outs[band] = flux / (outs[band]/exp)
+    outs.to_csv("photometry.csv")
