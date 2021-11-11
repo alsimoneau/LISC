@@ -6,21 +6,24 @@ import os as _os
 import pandas as _pd
 from exiftool import ExifTool as _ExifTool
 
-def open_raw(fname, normalize=False):
-    print(f"Opening raw file '{fname}'")
+def open_raw(fname, band_list="RGB"):
     raw = _rawpy.imread(fname)
-    rgb = raw.postprocess(
-        gamma = (1,1),
-        output_bps = 16,
-        no_auto_bright = True,
-        user_flip = 0,
-        demosaic_algorithm = _rawpy.DemosaicAlgorithm(0)
-    )
 
-    if normalize:
-        rgb = rgb / (2**16 - 1)
+    order = [ x[0] for x in sorted(
+        _np.ndenumerate(raw.raw_pattern),
+        key = lambda x: x[1]
+    ) ]
 
-    return rgb
+    data = _np.stack([
+        raw.raw_image_visible[i::2,j::2] for i,j in order
+    ], axis=-1) / raw.white_level
+
+    bands = _np.array(list(raw.color_desc.decode()))
+
+    return _np.stack([
+        _np.mean(data[...,bands==b], axis=-1) if sum(bands==b)>1 \
+        else data[...,_np.where(bands==b)[0][0]] for b in band_list
+    ], axis=-1)
 
 def exif_read(fname,raw=False):
     def safe_float(x):
@@ -82,7 +85,7 @@ def compute_stats(fnames):
         (count, mean, M2) = existingAggregate
         return (mean, M2 / count)
 
-    rgb = open_raw(fnames[0]).astype(_np.float64)
+    rgb = open_raw(fnames[0])
     aggregate = (1,rgb,_np.zeros_like(rgb))
     for fname in fnames[1:]:
         rgb = open_raw(fname)
@@ -102,9 +105,9 @@ def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
         print("Computing statistics...")
         mean,stdev = compute_stats(fnames)
     print("Clipping files...")
-    arr = open_raw(fnames[0]).astype(_np.float64)
+    arr = open_raw(fnames[0])
     for fname in fnames[1:]:
-        rgb = open_raw(fname).astype(_np.float64)
+        rgb = open_raw(fname)
         rgb[_np.abs(rgb-mean) > stdev*sigclip] = _np.nan
         arr = _np.nansum([arr,rgb],0)
     out = _np.round(arr/len(fnames)).astype(_np.uint16)
