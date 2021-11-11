@@ -64,7 +64,7 @@ def photometry(r=50,drift_window=200):
 
         crop = im[idy-drift_window:idy+drift_window,idx-drift_window:idx+drift_window]
 
-        blurred = gaussian_filter(crop.mean(2),r,mode="constant")
+        blurred = gaussian_filter(crop.mean(2),20,mode="constant")
         y,x = np.where(blurred == blurred.max())
 
         idx += x[0] - drift_window
