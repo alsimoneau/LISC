@@ -58,9 +58,10 @@ def exif_read(fname,raw=False):
             "ImageHeight" : "MakerNotes:SonyImageHeightMax",
             "ImageWidth" : "MakerNotes:SonyImageWidthMax"
         }
-    elif make == "DJI":
+    else:
         maker = {
-            "LensModel" : None
+            "LensModel" : None,
+            "ShutterSpeedValue" : None
         }
 
     keys.update(maker)
