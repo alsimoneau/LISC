@@ -50,6 +50,8 @@ def photometry(r=50,drift_window=200):
     alt_aod=p["altitude_aod"]
     alt_p=p["altitude_pressure"]
     press=p["pressure"]
+    r /= 2
+    drift_window /= 2
 
     lin_data = pd.read_csv("linearity.csv")
     flat_data = np.load("flatfield.npy")
@@ -57,6 +59,8 @@ def photometry(r=50,drift_window=200):
     dark = open_clipped("PHOTOMETRY/DARKS/*")
 
     idx,idy = initial
+    idx /= 2
+    idy /= 2
     outs = pd.DataFrame(columns=["Filename","SAT","X","Y","R","G","B","sR","sG","sB","bR","bG","bB"])
 
     for fname in progressbar(sorted(glob_types(f"PHOTOMETRY/*")),redirect_stdout=True):
@@ -64,12 +68,12 @@ def photometry(r=50,drift_window=200):
 
         crop = im[idy-drift_window:idy+drift_window,idx-drift_window:idx+drift_window]
 
-        blurred = gaussian_filter(crop.mean(2),20,mode="constant")
+        blurred = gaussian_filter(crop.mean(2),10,mode="constant")
         y,x = np.where(blurred == blurred.max())
 
         idx += x[0] - drift_window
         idy += y[0] - drift_window
-        print(f"Found star at: {idx}, {idy}")
+        print(f"Found star at: {idx*2}, {idy*2}")
 
         star_mask = circle_mask(idx,idy,im.shape,r)
         bgnd_mask = circle_mask(idx,idy,im.shape,2*r) \

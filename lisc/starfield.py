@@ -26,9 +26,9 @@ def CLI_starfield():
 def starfield():
     with open("params") as f:
         params = yaml.safe_load(f)
-    psize = params['pixel_size'] / 1000
-    Nx = params['width']
-    Ny = params['height']
+    psize = params['pixel_size'] / 1000 * 2
+    Nx = params['width'] // 2
+    Ny = params['height'] // 2
     f = params['focal_length']
 
     def align(coords,params):
@@ -54,8 +54,8 @@ def starfield():
 
     db = pd.read_csv("STARFIELD/starfield.csv")
 
-    xc = db['X'].to_numpy() - Nx/2
-    yc = Ny/2 - db['Y'].to_numpy()
+    xc = db['X'].to_numpy()/2 - Nx/2
+    yc = Ny/2 - db['Y'].to_numpy()/2
     az = np.pi - np.arctan2(-xc,-yc)
     alt = np.arctan( psize * np.sqrt(xc**2 + yc**2) / f )
     theta = np.pi/2 - np.deg2rad(db['ALT'])

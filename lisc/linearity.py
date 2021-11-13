@@ -27,12 +27,13 @@ def CLI_linearity(size):
     print("Done.")
 
 def linearity(size=25):
+    size /= 2
     set_times = { int(fname.split(os.sep)[-1].split('_')[0]) for fname in glob("LINEARITY/*.*") }
 
     with open("params") as f:
         params = yaml.safe_load(f)
-    Nx = params['width']
-    Ny = params['height']
+    Nx = params['width'] // 2
+    Ny = params['height'] // 2
     mask = np.zeros((Ny,Nx),dtype=np.bool8)
     mask[Ny//2 - size: Ny//2 + size + 1, Nx//2 - size: Nx//2 + size + 1] = True
 
