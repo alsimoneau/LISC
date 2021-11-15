@@ -1,8 +1,9 @@
 from setuptools import setup
+import lisc
 
 setup(
     name='LISC',
-    version='0.1.2',
+    version=lisc.__version__,
     description="Low Intensity Sensor Calibration",
     url="https://github.com/alsimoneau/lisc",
     author="Alexandre Simoneau",
