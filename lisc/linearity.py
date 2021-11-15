@@ -16,18 +16,19 @@ from glob import glob
 import exiftool
 from .utils import open_clipped as Open, sub, glob_types
 import yaml
+from progressbar import progressbar
 
 @click.command(name="lin")
-@click.option('-s',"--size",type=int,default=25,
-    help="Size of the window to process. (Default: 25)")
+@click.option('-s',"--size",type=int,default=50,
+    help="Size of the window to process. (Default: 50)")
 def CLI_linearity(size):
     """Process frames for linearity calibration.
     """
     linearity(size)
     print("Done.")
 
-def linearity(size=25):
-    size /= 2
+def linearity(size=50):
+    size //= 2
     set_times = { int(fname.split(os.sep)[-1].split('_')[0]) for fname in glob("LINEARITY/*.*") }
 
     with open("params") as f:
@@ -38,7 +39,7 @@ def linearity(size=25):
     mask[Ny//2 - size: Ny//2 + size + 1, Nx//2 - size: Nx//2 + size + 1] = True
 
     data = []
-    for ss in sorted(set_times):
+    for ss in progressbar(sorted(set_times),redirect_stdout=True):
         frame = Open(f"LINEARITY/{ss}_*")
         with exiftool.ExifTool() as et:
             exif = et.get_metadata(glob_types(f"LINEARITY/{ss}_*")[0])

@@ -7,6 +7,7 @@ import pandas as _pd
 from exiftool import ExifTool as _ExifTool
 
 def open_raw(fname, band_list="RGB"):
+    print(f"Opening '{fname}'")
     raw = _rawpy.imread(fname)
 
     order = [ x[0] for x in sorted(
@@ -106,12 +107,12 @@ def open_clipped(fnames,mean=None,stdev=None,sigclip=5):
         print("Computing statistics...")
         mean,stdev = compute_stats(fnames)
     print("Clipping files...")
-    arr = open_raw(fnames[0])
-    for fname in fnames[1:]:
+    arr = _np.zeros_like(mean)
+    for fname in fnames:
         rgb = open_raw(fname)
         rgb[_np.abs(rgb-mean) > stdev*sigclip] = _np.nan
         arr = _np.nansum([arr,rgb],0)
-    out = _np.round(arr/len(fnames)).astype(_np.uint16)
+    out = arr/len(fnames)
     if basename:
         _np.save(basename,out)
     return out
@@ -129,7 +130,7 @@ def cosmicray_removal(image,**kwargs):
     return new_data
 
 def sub(frame,dark):
-    return frame.astype(_np.int32)-dark
+    return frame-dark
 
 def cycle_mod(x,a=2*_np.pi):
     pos = x%a
