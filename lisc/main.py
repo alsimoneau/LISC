@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import click
 from importlib import import_module
+
+import click
 import lisc
 
 
@@ -24,7 +25,7 @@ functions = (
     (".init", "dir"),
     (".init", "init"),
     (".init", "save"),
-    (".init", "list")
+    (".init", "list"),
 )
 
 for module_name, method in functions:

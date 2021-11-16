@@ -8,31 +8,29 @@
 # Created: February 2021
 # Edited: April 2021
 
-import click
+import inspect
 import os
-import exiftool
+import shutil
 from glob import glob
+
+import click
+import exiftool
 import pandas as pd
 import yaml
-import inspect
-import shutil
+
 
 @click.command()
-@click.argument('folder_name', type=click.Path(exists=False), default='.')
+@click.argument("folder_name", type=click.Path(exists=False), default=".")
 def dir(folder_name):
     """Initialize calibration directory structure.
 
     FOLDER_NAME is the folder name the directory structure will be created into.
     If ommited, will create it in the current directory instead.
     """
-    folders = [
-        'FLATFIELD',
-        'LINEARITY',
-        'PHOTOMETRY'
-    ]
+    folders = ["FLATFIELD", "LINEARITY", "PHOTOMETRY"]
     for fold_name in folders:
-        os.makedirs(os.path.join(folder_name,fold_name,"DARKS"))
-    os.makedirs(os.path.join(folder_name,"STARFIELD"))
+        os.makedirs(os.path.join(folder_name, fold_name, "DARKS"))
+    os.makedirs(os.path.join(folder_name, "STARFIELD"))
 
     txt = [
         "star_id: 0           # Star's ID in the Yale Bright Star Catalog",
@@ -43,11 +41,11 @@ def dir(folder_name):
         "pressure: 101.3      # Air pressure [kPa]",
         "altitude: 0          # Altitude of the measurement site [m]",
         "altitude_aod: 0      # Altitude of the AERONET station used [m]",
-        "altitude_pressure: 0 # Altitude of the site where the pressure was measured [m]"
+        "altitude_pressure: 0 # Altitude of the site where the pressure was measured [m]",
     ]
 
-    with open("PHOTOMETRY/photometry.params",'w') as f:
-        f.write('\n'.join(txt))
+    with open("PHOTOMETRY/photometry.params", "w") as f:
+        f.write("\n".join(txt))
 
 
 @click.command()
@@ -104,7 +102,7 @@ def init():
         error = True
     else:
         try:
-            if not (a.columns == ["Name","X","Y","ALT","AZ"]).all():
+            if not (a.columns == ["Name", "X", "Y", "ALT", "AZ"]).all():
                 print("ERROR: Wrong columns name in starfield file.")
                 error = True
         except ValueError:
@@ -127,15 +125,18 @@ def init():
             f"width: {exif['MakerNotes:SonyImageWidthMax']}",
             f"lens: {exif['EXIF:LensModel']}",
             "focal_length: ----",
-            "pixel_size: ---- # in µm"
+            "pixel_size: ---- # in µm",
         ]
-        with open("params",'w') as f:
-            f.write('\n'.join(params))
+        with open("params", "w") as f:
+            f.write("\n".join(params))
 
-        print("Some information is missing.\n"
-        "Please open the `params` file and complete as needed.")
+        print(
+            "Some information is missing.\n"
+            "Please open the `params` file and complete as needed."
+        )
 
         print("Done.")
+
 
 @click.command()
 def save():
@@ -147,7 +148,7 @@ def save():
         "flatfield.npy",
         "flat_weight.npy",
         "photometry.csv",
-        "photometry.dat"
+        "photometry.dat",
     ]
 
     error = False
@@ -158,11 +159,11 @@ def save():
 
     if error:
         print("Error detected, aborting.")
-        return()
+        return ()
 
     with open("params") as f:
         params = yaml.safe_load(f)
-    cam_key = params['camera_reference_name']
+    cam_key = params["camera_reference_name"]
 
     datadir = os.path.expanduser(f"~/.LISC/{cam_key}/")
 
@@ -170,15 +171,16 @@ def save():
         flag = input(f"Data for {cam_key} already found, overwrite ? [Y/n] ")
         if len(flag) > 1 and flag[0] in "Nn":
             print("Aborting.")
-            return()
+            return ()
         shutil.rmtree(datadir)
 
-    print("Creating "+datadir)
+    print("Creating " + datadir)
     os.makedirs(datadir)
     for fname in datafiles:
-        shutil.copy(fname,datadir+fname)
+        shutil.copy(fname, datadir + fname)
 
     print("Done.")
+
 
 @click.command()
 def list():
@@ -188,7 +190,8 @@ def list():
         with open(param_file) as f:
             params = yaml.safe_load(f)
 
-        print(f"{params['camera_reference_name']}\n"
+        print(
+            f"{params['camera_reference_name']}\n"
             f"   Camera body: {params['camera']}\n"
             f"    Lens model: {params['lens']}\n"
         )
