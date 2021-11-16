@@ -40,10 +40,18 @@ def starfield():
         Theta, Phi, beta = params
 
         a = np.array(
-            [np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)]
+            [
+                np.sin(theta) * np.cos(phi),
+                np.sin(theta) * np.sin(phi),
+                np.cos(theta),
+            ]
         )
         k = np.array(
-            [np.sin(Theta) * np.cos(Phi), np.sin(Theta) * np.sin(Phi), np.cos(Theta)]
+            [
+                np.sin(Theta) * np.cos(Phi),
+                np.sin(Theta) * np.sin(Phi),
+                np.cos(Theta),
+            ]
         )
 
         b = (

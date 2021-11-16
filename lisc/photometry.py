@@ -82,7 +82,9 @@ def photometry(r=50, drift_window=200):
         ]
     )
 
-    for fname in progressbar(sorted(glob_types(f"PHOTOMETRY/*")), redirect_stdout=True):
+    for fname in progressbar(
+        sorted(glob_types(f"PHOTOMETRY/*")), redirect_stdout=True
+    ):
         im = sub(open_raw(fname), dark)
 
         crop = im[
@@ -134,7 +136,8 @@ def photometry(r=50, drift_window=200):
     star *= 1e-2  # ergs / s / cm^2 / A -> W / m^2 / nm
 
     Tm_exp = np.exp(
-        -(press / 101.3) / ((wls / 1000) ** 4 * 115.6406 - (wls / 1000) ** 2 * 1.335)
+        -(press / 101.3)
+        / ((wls / 1000) ** 4 * 115.6406 - (wls / 1000) ** 2 * 1.335)
     )
     Tm_inf = Tm_exp ** (1 / np.exp(-alt_p / 8000))
     Tm = Tm_inf ** (np.exp(-alt / 8000) / np.cos(theta))

@@ -11,13 +11,12 @@ from exiftool import ExifTool as _ExifTool
 def open_raw(fname, band_list="RGB"):
     print(f"Opening '{fname}'")
     raw = _rawpy.imread(fname)
+    p = raw.raw_pattern
+    im = raw.raw_image_visible
 
-    order = [x[0] for x in sorted(_np.ndenumerate(raw.raw_pattern), key=lambda x: x[1])]
-
-    data = (
-        _np.stack([raw.raw_image_visible[i::2, j::2] for i, j in order], axis=-1)
-        / raw.white_level
-    )
+    ind = np.unravel_index(np.argsort(p, axis=None), p.shape)
+    data = _np.stack([im[i::2, j::2] for i, j in zip(*ind)], axis=-1)
+    data /= raw.white_level
 
     bands = _np.array(list(raw.color_desc.decode()))
 
@@ -50,13 +49,13 @@ def exif_read(fname, raw=False):
         return exif
 
     gen = [
+        "ExposureTime",
+        "ImageHeight",
+        "ImageWidth",
+        "ISO",
+        "LensModel",
         "Make",
         "Model",
-        "LensModel",
-        "ImageWidth",
-        "ImageHeight",
-        "ExposureTime",
-        "ISO",
         "ShutterSpeedValue",
     ]
     keys = {k: "EXIF:" + k for k in gen}
@@ -64,16 +63,20 @@ def exif_read(fname, raw=False):
     make = exif[keys["Make"]]
     if make == "SONY":
         maker = {
-            "ShutterSpeedValue": "MakerNotes:SonyExposureTime2",
             "ImageHeight": "MakerNotes:SonyImageHeightMax",
             "ImageWidth": "MakerNotes:SonyImageWidthMax",
+            "ShutterSpeedValue": "MakerNotes:SonyExposureTime2",
         }
     else:
-        maker = {"LensModel": None, "ShutterSpeedValue": None}
+        maker = {
+            "LensModel": None,
+            "ShutterSpeedValue": None,
+        }
 
     keys.update(maker)
     info = {
-        k: safe_float(exif[v]) if v is not None else "----" for k, v in keys.items()
+        k: safe_float(exif[v]) if v is not None else "----"
+        for k, v in keys.items()
     }
 
     return info
@@ -106,14 +109,19 @@ def compute_stats(fnames):
 def open_clipped(fnames, mean=None, stdev=None, sigclip=5):
     basename = ""
     if type(fnames) == str:
-        basename = fnames.replace("*", "$").replace("?", "&").replace(".", "!") + ".npy"
+        basename = (
+            fnames.replace("*", "$").replace("?", "&").replace(".", "!")
+            + ".npy"
+        )
         if _os.path.isfile(basename):
             print(f"Opening {fnames} from cache")
             return _np.load(basename)
         fnames = glob_types(fnames)
+
     if mean is None or stdev is None:
         print("Computing statistics...")
         mean, stdev = compute_stats(fnames)
+
     print("Clipping files...")
     arr = _np.zeros_like(mean)
     for fname in fnames:
@@ -121,8 +129,10 @@ def open_clipped(fnames, mean=None, stdev=None, sigclip=5):
         rgb[_np.abs(rgb - mean) > stdev * sigclip] = _np.nan
         arr = _np.nansum([arr, rgb], 0)
     out = arr / len(fnames)
+
     if basename:
         _np.save(basename, out)
+
     return out
 
 
@@ -131,7 +141,11 @@ def cosmicray_removal(image, **kwargs):
         kwargs["sigclip"] = 25
     if image.ndim == 3:
         new_data = _np.stack(
-            [_detect_cosmics(image[:, :, i], **kwargs)[1] for i in range(3)], axis=2
+            [
+                _detect_cosmics(band, **kwargs)[1]
+                for band in np.moveaxis(image, -1, 0)
+            ],
+            axis=2,
         )
     else:
         new_data = _detect_cosmics(image, **kwargs)[1]
@@ -143,8 +157,7 @@ def sub(frame, dark):
 
 
 def cycle_mod(x, a=2 * _np.pi):
-    pos = x % a
-    neg = x % -a
+    pos, neg = x % a, x % -a
     return _np.where(_np.abs(neg) < pos, neg, pos)
 
 
@@ -163,7 +176,11 @@ def correct_linearity(data, lin_data="linearity.csv"):
 
     dat = _np.array(
         [
-            _np.interp(data[:, :, i], lin_data[band][::-1], lin_data["Exposure"][::-1])
+            _np.interp(
+                data[:, :, i],
+                lin_data[band][::-1],
+                lin_data["Exposure"][::-1],
+            )
             for i, band in enumerate("RGB")
         ]
     )

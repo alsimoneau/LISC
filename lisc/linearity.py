@@ -40,7 +40,8 @@ def CLI_linearity(size):
 def linearity(size=50):
     size //= 2
     set_times = {
-        int(fname.split(os.sep)[-1].split("_")[0]) for fname in glob("LINEARITY/*.*")
+        int(fname.split(os.sep)[-1].split("_")[0])
+        for fname in glob("LINEARITY/*.*")
     }
 
     with open("params") as f:
@@ -49,7 +50,8 @@ def linearity(size=50):
     Ny = params["height"] // 2
     mask = np.zeros((Ny, Nx), dtype=np.bool8)
     mask[
-        Ny // 2 - size : Ny // 2 + size + 1, Nx // 2 - size : Nx // 2 + size + 1
+        Ny // 2 - size : Ny // 2 + size + 1,
+        Nx // 2 - size : Nx // 2 + size + 1,
     ] = True
 
     data = []
@@ -64,4 +66,6 @@ def linearity(size=50):
         print(exp, *frame[mask].mean(0))
         data.append((exp, *frame[mask].mean(0)))
 
-    pd.DataFrame(data, columns=["Exposure", "R", "G", "B"]).to_csv("linearity.csv")
+    pd.DataFrame(data, columns=["Exposure", "R", "G", "B"]).to_csv(
+        "linearity.csv"
+    )
