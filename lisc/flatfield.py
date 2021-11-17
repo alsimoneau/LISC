@@ -14,6 +14,7 @@ from glob import glob
 import click
 import numpy as np
 import pandas as pd
+from progressbar import progressbar
 from scipy.ndimage import gaussian_filter
 
 from .utils import *
@@ -57,7 +58,7 @@ def flatfield():
     pixsixe = fov[0, fov.shape[1] // 2] / (fov.shape[0] / 2)
     blur = gaussian_filter(circle.astype(float), blur_radius / pixsixe)
 
-    for fname in glob_types("FLATFIELD/*"):
+    for fname in progressbar(glob_types("FLATFIELD/*"), redirect_stdout=True):
         foo, el, az = os.path.splitext(os.path.basename(fname))[0].split("_")
         el, az = float(el), float(az) - offset
         r = el / pixsixe
