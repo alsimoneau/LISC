@@ -1,4 +1,7 @@
 # LISC
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+
 Low Intensity Sensor Calibration software package.
 
 This program calibrates raw images from a specific camera at a given ISO, focal lenght and focus. To do so, calibration files must be produced.
@@ -34,7 +37,3 @@ Once that process is done, images can be calibrated from anywhere on the system 
 ## Contributing
 
 This research makes use of the code described in **van Dokkum (2001)** as implemented by **McCully (2014)** for cosmic rays removal.
-
-## License
-
-[MIT](./LICENSE) © 2021 Alexandre Simoneau
