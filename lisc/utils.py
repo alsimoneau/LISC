@@ -174,18 +174,22 @@ def correct_linearity(data, lin_data="linearity.csv"):
     if type(lin_data) == str:
         lin_data = _pd.read_csv(lin_data)
 
-    dat = _np.array(
+    return _np.stack(
         [
-            _np.interp(
-                data[:, :, i],
-                lin_data[band][::-1],
-                lin_data["Exposure"][::-1],
+            _np.interp(layer, lin_data[band][::-1], c)
+            for band, layer, c in zip(
+                "RGB",
+                _np.moveaxis(data, -1, 0),
+                (
+                    lin_data[band][6]
+                    / lin_data["Exposure"][6]
+                    * lin_data["Exposure"][::-1]
+                    for band in "RGB"
+                ),
             )
-            for i, band in enumerate("RGB")
-        ]
+        ],
+        axis=2,
     )
-
-    return dat.transpose(1, 2, 0)
 
 
 def correct_flat(data, flat_data="flatfield.npy"):
