@@ -14,9 +14,9 @@ def open_raw(fname, band_list="RGB"):
     p = raw.raw_pattern
     im = raw.raw_image_visible
 
-    ind = np.unravel_index(np.argsort(p, axis=None), p.shape)
+    ind = _np.unravel_index(_np.argsort(p, axis=None), p.shape)
     data = _np.stack([im[i::2, j::2] for i, j in zip(*ind)], axis=-1)
-    data /= raw.white_level
+    data = data / raw.white_level
 
     bands = _np.array(list(raw.color_desc.decode()))
 
@@ -143,7 +143,7 @@ def cosmicray_removal(image, **kwargs):
         new_data = _np.stack(
             [
                 _detect_cosmics(band, **kwargs)[1]
-                for band in np.moveaxis(image, -1, 0)
+                for band in _np.moveaxis(image, -1, 0)
             ],
             axis=2,
         )
