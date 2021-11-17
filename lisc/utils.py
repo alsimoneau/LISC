@@ -155,10 +155,6 @@ def cosmicray_removal(image, **kwargs):
     return new_data
 
 
-def sub(frame, dark):
-    return frame - dark
-
-
 def cycle_mod(x, a=2 * _np.pi):
     pos, neg = x % a, x % -a
     return _np.where(_np.abs(neg) < pos, neg, pos)

@@ -14,9 +14,10 @@ import shutil
 from glob import glob
 
 import click
-import exiftool
 import pandas as pd
 import yaml
+
+from .utils import exif_read
 
 
 @click.command()
@@ -114,16 +115,14 @@ def init():
         print("Error detected, aborting.")
     else:
         fname = glob("PHOTOMETRY/*.*")[0]
-
-        with exiftool.ExifTool() as et:
-            exif = et.get_metadata(fname)
+        exif = exif_read(fname)
 
         params = [
             f"camera_reference_name: ----",
-            f"camera: {exif['EXIF:Make']} {exif['EXIF:Model']}",
-            f"height: {exif['MakerNotes:SonyImageHeightMax']}",
-            f"width: {exif['MakerNotes:SonyImageWidthMax']}",
-            f"lens: {exif['EXIF:LensModel']}",
+            f"camera: {exif['Make']} {exif['Model']}",
+            f"height: {exif['ImageHeight']}",
+            f"width: {exif['ImageWidth']}",
+            f"lens: {exif['LensModel']}",
             "focal_length: ----",
             "pixel_size: ---- # in µm",
         ]

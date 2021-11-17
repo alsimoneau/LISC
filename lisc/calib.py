@@ -12,12 +12,18 @@ import os
 from glob import glob
 
 import click
-import exiftool
 import imageio
 import numpy as np
 import pandas as pd
 
-from .utils import *
+from .utils import (
+    correct_flat,
+    correct_linearity,
+    cosmicray_removal,
+    exif_read,
+    open_clipped,
+    open_raw,
+)
 
 
 @click.command(name="calib")
@@ -68,13 +74,16 @@ def calib(cam_key, images, darks, fmt="npy", sigclip=5):
 
     for fname in images:
         print(f"Calibrating '{fname}'...")
-        with exiftool.ExifTool() as et:
-            exif = et.get_metadata(fname)
-        exp = float(exif["MakerNotes:SonyExposureTime2"])
-
-        im = cosmicray_removal(sub(open_raw(fname), dark), sigclip=sigclip)
-        data = correct_flat(correct_linearity(im, lin_data), flat_data)
-        data *= photo / exp
+        data = (
+            correct_flat(
+                correct_linearity(
+                    cosmicray_removal(open_raw(fname) - dark, sigclip=sigclip),
+                    lin_data,
+                ),
+                flat_data,
+            )
+            * (photo / exif_read(fname)["ShutterSpeedValue"])
+        )
 
         if fmt == "npy":
             np.save(fname.rsplit(".", 1)[0], data)

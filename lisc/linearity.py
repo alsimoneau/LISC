@@ -18,9 +18,7 @@ import pandas as pd
 import yaml
 from progressbar import progressbar
 
-from .utils import glob_types
-from .utils import open_clipped as Open
-from .utils import sub
+from .utils import exif_read, glob_types, open_clipped
 
 
 @click.command(name="lin")
@@ -56,16 +54,10 @@ def linearity(size=50):
 
     data = []
     for ss in progressbar(sorted(set_times), redirect_stdout=True):
-        frame = Open(f"LINEARITY/{ss}_*")
-        with exiftool.ExifTool() as et:
-            exif = et.get_metadata(glob_types(f"LINEARITY/{ss}_*")[0])
-        exp = exif["MakerNotes:SonyExposureTime2"]
-        dark = Open(f"LINEARITY/DARKS/{ss}_*")
-        frame = sub(frame, dark)
+        frame = open_clipped(f"LINEARITY/{ss}_*")
+        dark = open_clipped(f"LINEARITY/DARKS/{ss}_*")
+        exif = exif_read(glob_types(f"LINEARITY/{ss}_*")[0])
+        data.append((exif["ShutterSpeedValue"], *(frame - dark)[mask].mean(0)))
 
-        print(exp, *frame[mask].mean(0))
-        data.append((exp, *frame[mask].mean(0)))
-
-    pd.DataFrame(data, columns=["Exposure", "R", "G", "B"]).to_csv(
-        "linearity.csv"
-    )
+    df = pd.DataFrame(data, columns=["Exposure", "R", "G", "B"])
+    df.to_csv("linearity.csv")

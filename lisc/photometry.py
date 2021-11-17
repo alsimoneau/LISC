@@ -13,10 +13,8 @@ from glob import glob
 from os.path import basename
 
 import click
-import exiftool
 import numpy as np
 import pandas as pd
-import rawpy
 import requests
 import yaml
 from progressbar import progressbar
@@ -45,7 +43,6 @@ def CLI_photometry(radius, drift_window):
 def photometry(r=50, drift_window=200):
     with open("PHOTOMETRY/photometry.params") as f:
         p = yaml.safe_load(f)
-    theta = np.deg2rad(p["theta"])
     r /= 2
     drift_window //= 2
 
@@ -82,9 +79,7 @@ def photometry(r=50, drift_window=200):
         )
 
         sat = (im[star_mask] > 0.95).any()
-        im = correct_flat(
-            correct_linearity(sub(im, dark), lin_data), flat_data
-        )
+        im = correct_flat(correct_linearity(im - dark, lin_data), flat_data)
 
         star = np.sum(im[star_mask], 0)
         bgnd = np.sum(im[bgnd_mask], 0) * np.sum(star_mask) / np.sum(bgnd_mask)
@@ -112,11 +107,15 @@ def photometry(r=50, drift_window=200):
         / ((wls / 1000) ** 4 * 115.6406 - (wls / 1000) ** 2 * 1.335)
     )
     Tm_inf = Tm_exp ** (1 / np.exp(-p["altitude_pressure"] / 8000))
-    Tm = Tm_inf ** (np.exp(-p["altitude"] / 8000) / np.cos(theta))
+    Tm = Tm_inf ** (
+        np.exp(-p["altitude"] / 8000) / np.cos(np.deg2rad(p["theta"]))
+    )
 
     Ta_exp = np.exp(-p["aod"] * (wls / 500) ** (-p["alpha"]))
     Ta_inf = Ta_exp ** (1 / np.exp(-p["altitude_aod"] / 2000))
-    Ta = Ta_inf ** (np.exp(-p["altitude"] / 2000) / np.cos(theta))
+    Ta = Ta_inf ** (
+        np.exp(-p["altitude"] / 2000) / np.cos(np.deg2rad(p["theta"]))
+    )
 
     with open("photometry.dat", "w"):
         pass

@@ -17,7 +17,7 @@ import pandas as pd
 from progressbar import progressbar
 from scipy.ndimage import gaussian_filter
 
-from .utils import *
+from .utils import correct_linearity, open_raw
 
 
 @click.command(name="flat")
@@ -66,7 +66,7 @@ def flatfield():
         y = -int(round(r * np.cos(np.deg2rad(az))))
 
         shifted = shift(blur, x, y)
-        frame = correct_linearity(sub(open_raw(fname), dark), lin_data)
+        frame = correct_linearity(open_raw(fname) - dark, lin_data)
 
         count += shifted
         light += frame * shifted[..., None]
