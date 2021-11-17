@@ -11,21 +11,24 @@ from exiftool import ExifTool as _ExifTool
 def open_raw(fname, band_list="RGB"):
     print(f"Opening '{fname}'")
     raw = _rawpy.imread(fname)
-    p = raw.raw_pattern
-    im = raw.raw_image_visible
+    h = raw.sizes.height // 2
+    w = raw.sizes.width // 2
 
-    ind = _np.unravel_index(_np.argsort(p, axis=None), p.shape)
-    data = _np.stack([im[i::2, j::2] for i, j in zip(*ind)], axis=-1)
-    data = data / raw.white_level
+    data = (
+        raw.raw_image_visible.reshape(h, 2, w, 2)
+        .transpose((1, 3, 0, 2))
+        .reshape(4, h, w)
+    ) / raw.white_level
 
-    bands = _np.array(list(raw.color_desc.decode()))
+    bands_mask = (
+        _np.array(list(raw.color_desc.decode()))[raw.raw_pattern.flatten()]
+        == _np.array(list(band_list))[:, None]
+    )
 
     return _np.stack(
         [
-            _np.mean(data[..., bands == b], axis=-1)
-            if sum(bands == b) > 1
-            else data[..., _np.where(bands == b)[0][0]]
-            for b in band_list
+            _np.mean(data[b], axis=0) if sum(b) > 1 else data[b][0]
+            for b in bands_mask
         ],
         axis=-1,
     )
