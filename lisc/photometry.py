@@ -80,11 +80,9 @@ def photometry(r=50, drift_window=200):
 
         sat = (im[star_mask] > 0.95).any()
         im = correct_flat(correct_linearity(im - dark, lin_data), flat_data)
-
-        star = np.sum(im[star_mask], 0)
-        bgnd = np.sum(im[bgnd_mask], 0) * np.sum(star_mask) / np.sum(bgnd_mask)
-
-        rad = star - bgnd
+        rad = np.sum(im[star_mask], 0) - (
+            np.sum(im[bgnd_mask], 0) * (np.sum(star_mask) / np.sum(bgnd_mask))
+        )
 
         outs.loc[len(outs)] = [basename(fname), sat, idx, idy, *rad]
 
@@ -103,9 +101,10 @@ def photometry(r=50, drift_window=200):
     star *= 1e-2  # ergs / s / cm^2 / A -> W / m^2 / nm
 
     Tm_exp = np.exp(
-        -(p["pressure"] / 101.3)
-        / ((wls / 1000) ** 4 * 115.6406 - (wls / 1000) ** 2 * 1.335)
+        -(p["pressure"] / 101.3) / ((wls / 1000) ** 4 * 115.6406)
+        - (wls / 1000) ** 2 * 1.335
     )
+
     Tm_inf = Tm_exp ** (1 / np.exp(-p["altitude_pressure"] / 8000))
     Tm = Tm_inf ** (
         np.exp(-p["altitude"] / 8000) / np.cos(np.deg2rad(p["theta"]))

@@ -53,7 +53,6 @@ def starfield():
                 np.cos(Theta),
             ]
         )
-
         b = (
             np.cos(beta) * a
             + np.sin(beta) * np.cross(k, a.T).T
