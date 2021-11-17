@@ -54,7 +54,7 @@ def photometry(r=50, drift_window=200):
     alt_p = p["altitude_pressure"]
     press = p["pressure"]
     r /= 2
-    drift_window /= 2
+    drift_window //= 2
 
     lin_data = pd.read_csv("linearity.csv")
     flat_data = np.load("flatfield.npy")
@@ -62,8 +62,8 @@ def photometry(r=50, drift_window=200):
     dark = open_clipped("PHOTOMETRY/DARKS/*")
 
     idx, idy = initial
-    idx /= 2
-    idy /= 2
+    idx //= 2
+    idy //= 2
     outs = pd.DataFrame(
         columns=[
             "Filename",
