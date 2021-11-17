@@ -10,6 +10,7 @@
 
 import os
 from glob import glob
+from os.path import basename
 
 import click
 import exiftool
@@ -56,28 +57,12 @@ def photometry(r=50, drift_window=200):
     idx, idy = p["star_position"]
     idx //= 2
     idy //= 2
-    outs = pd.DataFrame(
-        columns=[
-            "Filename",
-            "SAT",
-            "X",
-            "Y",
-            "R",
-            "G",
-            "B",
-            "sR",
-            "sG",
-            "sB",
-            "bR",
-            "bG",
-            "bB",
-        ]
-    )
+    outs = pd.DataFrame(columns=["Filename", "SAT", "X", "Y", "R", "G", "B"])
 
     for fname in progressbar(
         sorted(glob_types(f"PHOTOMETRY/*")), redirect_stdout=True
     ):
-        im = sub(open_raw(fname), dark)
+        im = open_raw(fname)
 
         crop = im[
             idy - drift_window : idy + drift_window,
@@ -96,23 +81,17 @@ def photometry(r=50, drift_window=200):
             idx, idy, im.shape, 1.5 * r
         )
 
-        sat = (im[star_mask] > 60000).any()
-        im = correct_flat(correct_linearity(im, lin_data), flat_data)
+        sat = (im[star_mask] > 0.95).any()
+        im = correct_flat(
+            correct_linearity(sub(im, dark), lin_data), flat_data
+        )
 
         star = np.sum(im[star_mask], 0)
         bgnd = np.sum(im[bgnd_mask], 0) * np.sum(star_mask) / np.sum(bgnd_mask)
 
         rad = star - bgnd
 
-        outs.loc[len(outs)] = [
-            fname[len("PHOTOMETRY/") :],
-            sat,
-            idx,
-            idy,
-            *rad,
-            *star,
-            *bgnd,
-        ]
+        outs.loc[len(outs)] = [basename(fname), sat, idx, idy, *rad]
 
     exp = exif_read(glob_types("PHOTOMETRY/*")[0])["ShutterSpeedValue"]
 
