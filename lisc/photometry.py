@@ -44,15 +44,7 @@ def CLI_photometry(radius, drift_window):
 def photometry(r=50, drift_window=200):
     with open("PHOTOMETRY/photometry.params") as f:
         p = yaml.safe_load(f)
-    star_id = p["star_id"]
-    initial = p["star_position"]
-    aod = p["aod"]
-    alpha = p["alpha"]
     theta = np.deg2rad(p["theta"])
-    alt = p["altitude"]
-    alt_aod = p["altitude_aod"]
-    alt_p = p["altitude_pressure"]
-    press = p["pressure"]
     r /= 2
     drift_window //= 2
 
@@ -61,7 +53,7 @@ def photometry(r=50, drift_window=200):
 
     dark = open_clipped("PHOTOMETRY/DARKS/*")
 
-    idx, idy = initial
+    idx, idy = p["star_position"]
     idx //= 2
     idy //= 2
     outs = pd.DataFrame(
@@ -127,7 +119,8 @@ def photometry(r=50, drift_window=200):
     with open("star_spectrum.dat", "wb") as f:
         f.write(
             requests.get(
-                f"http://nartex.fis.ucm.es/~ncl/rgbphot/asciisingle/hr{star_id:04}.txt"
+                "http://nartex.fis.ucm.es/~ncl/rgbphot/asciisingle/"
+                f"hr{p['star_id']:04}.txt"
             ).content
         )
 
@@ -136,15 +129,15 @@ def photometry(r=50, drift_window=200):
     star *= 1e-2  # ergs / s / cm^2 / A -> W / m^2 / nm
 
     Tm_exp = np.exp(
-        -(press / 101.3)
+        -(p["pressure"] / 101.3)
         / ((wls / 1000) ** 4 * 115.6406 - (wls / 1000) ** 2 * 1.335)
     )
-    Tm_inf = Tm_exp ** (1 / np.exp(-alt_p / 8000))
-    Tm = Tm_inf ** (np.exp(-alt / 8000) / np.cos(theta))
+    Tm_inf = Tm_exp ** (1 / np.exp(-p["altitude_pressure"] / 8000))
+    Tm = Tm_inf ** (np.exp(-p["altitude"] / 8000) / np.cos(theta))
 
-    Ta_exp = np.exp(-aod * (wls / 500) ** (-alpha))
-    Ta_inf = Ta_exp ** (1 / np.exp(-alt_aod / 2000))
-    Ta = Ta_inf ** (np.exp(-alt / 2000) / np.cos(theta))
+    Ta_exp = np.exp(-p["aod"] * (wls / 500) ** (-p["alpha"]))
+    Ta_inf = Ta_exp ** (1 / np.exp(-p["altitude_aod"] / 2000))
+    Ta = Ta_inf ** (np.exp(-p["altitude"] / 2000) / np.cos(theta))
 
     with open("photometry.dat", "w"):
         pass
