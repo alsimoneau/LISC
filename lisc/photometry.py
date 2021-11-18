@@ -50,8 +50,8 @@ def lowtran(wls, pressure, altitude, altitude_pressure):
     return Tm_inf ** np.exp(-altitude / 8000)
 
 
-def bodhaine(wls, pressure, altitude, alt_p, CO2, latitude):
-    pressure *= (1 - 0.0065 * (altitude - alt_p) / 288.15) ** (
+def bodhaine(wls, pressure, altitude, altitude_pressure, CO2, latitude):
+    pressure *= (1 - 0.0065 * (altitude - altitude_pressure) / 288.15) ** (
         (-9.80665 * 0.0289644) / (8.3144598 * -0.0065)
     )
 
