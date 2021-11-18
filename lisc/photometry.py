@@ -41,14 +41,20 @@ def CLI_photometry(radius, drift_window):
 # TODO: Use astrometry for star identification
 
 
-def lowtran(wls, pressure):
-    return np.exp(
+def lowtran(wls, pressure, altitude, altitude_pressure):
+    Tm_exp = np.exp(
         -(pressure / 101.3) / ((wls / 1000) ** 4 * 115.6406)
         - (wls / 1000) ** 2 * 1.335
     )
+    Tm_inf = Tm_exp ** np.exp(altitude_pressure / 8000)
+    return Tm_inf ** np.exp(-altitude / 8000)
 
 
-def bodhaine(wls, pressure, temperature, CO2, altitude, latitude):
+def bodhaine(wls, pressure, altitude, alt_p, CO2, latitude):
+    pressure *= (1 - 0.0065 * (altitude - alt_p) / 288.15) ** (
+        (-9.80665 * 0.0289644) / (8.3144598 * -0.0065)
+    )
+
     FO2 = 1.096 + 1.385e-3 * wls ** -2 + 1.448e-4 * wls ** -4
     FN2 = 1.034 + 3.17e-4 * wls ** -2
     Fair = (78.084 * FN2 + 20.946 * FO2 + 0.934 * 1.00 + CO2 * 1.15) / (
@@ -60,7 +66,7 @@ def bodhaine(wls, pressure, temperature, CO2, altitude, latitude):
         + 17455.7 / (39.32957 - (wls / 1e3) ** -2)
     )  # lambda in um
     nCO2 = 1 + (n300m1 * (1 + 0.54 * (CO2 / 1e6 - 0.0003)))
-    Ns = N_A / 22.4141 * 273.15 / (temperature + 273.15) * 1e-3  # mol/cm^3, K
+    Ns = N_A / 22.4141 * 273.15 / 288.15 * 1e-3  # mol/cm^3
     sig = (
         (24 * np.pi ** 3 * (nCO2 ** 2 - 1) ** 2)
         / ((wls / 1e7) ** 4 * Ns ** 2 * (nCO2 ** 2 + 2) ** 2)
@@ -156,12 +162,8 @@ def photometry(r=50, drift_window=200):
     wls /= 10  # A -> nm
     star *= 1e-2  # ergs / s / cm^2 / A -> W / m^2 / nm
 
-    Tm_exp = lowtran(wls, p["pressure"])
-
-    Tm_inf = Tm_exp ** (1 / np.exp(-p["altitude_pressure"] / 8000))
-    Tm = Tm_inf ** (
-        np.exp(-p["altitude"] / 8000) / np.cos(np.deg2rad(p["theta"]))
-    )
+    Tm_exp = lowtran(wls, p["pressure"], p["altitude"], p["altitude_pressure"])
+    Tm = Tm_exp ** np.exp(1 / np.cos(np.deg2rad(p["theta"])))
 
     Ta_exp = np.exp(-p["aod"] * (wls / 500) ** (-p["alpha"]))
     Ta_inf = Ta_exp ** (1 / np.exp(-p["altitude_aod"] / 2000))
