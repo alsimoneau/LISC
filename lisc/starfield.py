@@ -34,7 +34,7 @@ def starfield():
     f = params["focal_length"]
 
     im = open_raw(glob_types("STARFIELD/starfield")[0])
-    Ny, Nx = im.shape
+    Ny, Nx = im.shape[:2]
 
     def align(coords, params):
         theta, phi = coords
