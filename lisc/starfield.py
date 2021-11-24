@@ -14,7 +14,7 @@ import pandas as pd
 import yaml
 from scipy.optimize import curve_fit, leastsq
 
-from .utils import cycle_mod
+from .utils import cycle_mod, glob_types, open_raw
 
 
 @click.command(name="geo")
@@ -31,9 +31,11 @@ def starfield():
     with open("params") as f:
         params = yaml.safe_load(f)
     psize = params["pixel_size"] / 1000 * 2
-    Nx = params["width"] // 2
-    Ny = params["height"] // 2
     f = params["focal_length"]
+
+    im = open_raw(glob_types("STARFIELD/starfield")[0])
+    Nx = im.shape[1] // 2
+    Ny = im.shape[1] // 2
 
     def align(coords, params):
         theta, phi = coords

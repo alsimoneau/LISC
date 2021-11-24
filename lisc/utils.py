@@ -11,11 +11,11 @@ from exiftool import ExifTool as _ExifTool
 def open_raw(fname, band_list="RGB"):
     print(f"Opening '{fname}'")
     raw = _rawpy.imread(fname)
-    h = raw.sizes.height // 2
-    w = raw.sizes.width // 2
+    h = raw.sizes.raw_height // 2
+    w = raw.sizes.raw_width // 2
 
     data = (
-        raw.raw_image_visible.reshape(h, 2, w, 2)
+        raw.raw_image.reshape(h, 2, w, 2)
         .transpose((1, 3, 0, 2))
         .reshape(4, h, w)
     ) / raw.white_level
@@ -35,16 +35,6 @@ def open_raw(fname, band_list="RGB"):
 
 
 def exif_read(fname, raw=False):
-    def safe_float(x):
-        try:
-            a = float(x)
-        except ValueError:
-            a = x
-        else:
-            if a == int(a):
-                a = int(a)
-        return a
-
     with _ExifTool() as et:
         exif = et.get_metadata(fname)
 
@@ -53,8 +43,6 @@ def exif_read(fname, raw=False):
 
     gen = [
         "ExposureTime",
-        "ImageHeight",
-        "ImageWidth",
         "ISO",
         "LensModel",
         "Make",
@@ -66,21 +54,38 @@ def exif_read(fname, raw=False):
     make = exif[keys["Make"]]
     if make == "SONY":
         maker = {
-            "ImageHeight": "MakerNotes:SonyImageHeightMax",
-            "ImageWidth": "MakerNotes:SonyImageWidthMax",
-            "ShutterSpeedValue": "MakerNotes:SonyExposureTime2",
-        }
-    else:
-        maker = {
-            "LensModel": None,
-            "ShutterSpeedValue": None,
+            "ShutterSpeedValue": (
+                "MakerNotes:SonyExposureTime",
+                "MakerNotes:SonyExposureTime2",
+                "MakerNotes:ExposureTime",
+            ),
         }
 
+    def unroll(keys, vals):
+        for val in vals:
+            if val in keys:
+                return val
+        else:
+            return None
+
+    def safe_float(x):
+        try:
+            a = float(x)
+        except ValueError:
+            a = x
+        else:
+            if a == int(a):
+                a = int(a)
+        return a
+
+    def process(v):
+        v = unroll(exif, v) if type(v) is tuple else v
+        v = v if v in exif else None
+        v = safe_float(exif[v]) if v is not None else "----"
+        return v
+
     keys.update(maker)
-    info = {
-        k: safe_float(exif[v]) if v is not None else "----"
-        for k, v in keys.items()
-    }
+    info = {k: process(v) for k, v in keys.items()}
 
     return info
 

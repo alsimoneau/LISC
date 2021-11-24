@@ -120,8 +120,6 @@ def init():
         params = [
             f"camera_reference_name: ----",
             f"camera: {exif['Make']} {exif['Model']}",
-            f"height: {exif['ImageHeight']}",
-            f"width: {exif['ImageWidth']}",
             f"lens: {exif['LensModel']}",
             "focal_length: ----",
             "pixel_size: ---- # in µm",

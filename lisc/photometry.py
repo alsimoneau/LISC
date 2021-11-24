@@ -97,7 +97,7 @@ def bodhaine(wls, pressure, altitude, altitude_pressure, CO2, latitude):
         - (1.517e-17 + 6e-20 * c2l) * z ** 3
     )  # cm/s^2
 
-    rod = sig * ((p * 1e4) * N_A) / (ma * g)  # kPa -> dyn/cm^2
+    rod = sig * ((pressure * 1e4) * N_A) / (ma * g)  # kPa -> dyn/cm^2
 
     return np.exp(-rod)
 
