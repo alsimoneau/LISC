@@ -17,7 +17,7 @@ import pandas as pd
 from progressbar import progressbar
 from scipy.ndimage import gaussian_filter
 
-from .utils import correct_linearity, open_raw
+from .utils import correct_linearity, glob_types, open_clipped, open_raw
 
 
 @click.command(name="flat")
