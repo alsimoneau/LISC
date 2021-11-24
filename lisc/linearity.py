@@ -18,7 +18,7 @@ import pandas as pd
 import yaml
 from progressbar import progressbar
 
-from .utils import exif_read, glob_types, open_clipped
+from .utils import exif_read, glob_types, open_clipped, open_raw
 
 
 @click.command(name="lin")
@@ -44,8 +44,7 @@ def linearity(size=50):
 
     with open("params") as f:
         params = yaml.safe_load(f)
-    Nx = params["width"] // 2
-    Ny = params["height"] // 2
+    Ny, Nx = open_raw(glob_types("LINEARITY/*")[0]).shape[:2]
     mask = np.zeros((Ny, Nx), dtype=np.bool8)
     mask[
         Ny // 2 - size : Ny // 2 + size + 1,
