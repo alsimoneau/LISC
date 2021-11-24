@@ -35,7 +35,7 @@ def starfield():
 
     im = open_raw(glob_types("STARFIELD/starfield")[0])
     Nx = im.shape[1] // 2
-    Ny = im.shape[1] // 2
+    Ny = im.shape[0] // 2
 
     def align(coords, params):
         theta, phi = coords
@@ -69,7 +69,7 @@ def starfield():
     def error(params, y, x):
         ans = align(x, params)
         return (
-            np.sin(y[1]) * (cycle_mod(y[0] - ans[0])) ** 2
+            np.sin(y[0]) * (cycle_mod(y[0] - ans[0])) ** 2
             + cycle_mod(y[1] - ans[1]) ** 2
         )
 
