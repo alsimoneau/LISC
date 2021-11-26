@@ -57,7 +57,7 @@ def aeronet(wls):
     )
 
 
-def photometry(r=50, drift_window=200):
+def photometry(r=50, drift_window=50):
     with open("PHOTOMETRY/photometry.params") as f:
         p = yaml.safe_load(f)
     r /= 2
@@ -73,6 +73,7 @@ def photometry(r=50, drift_window=200):
     idy //= 2
     outs = pd.DataFrame(columns=["Filename", "SAT", "X", "Y", "R", "G", "B"])
 
+    n = 0
     for fname in progressbar(
         sorted(glob_types(f"PHOTOMETRY/*")), redirect_stdout=True
     ):
@@ -85,6 +86,14 @@ def photometry(r=50, drift_window=200):
 
         blurred = gaussian_filter(crop.mean(2), 10, mode="constant")
         y, x = np.where(blurred == blurred.max())
+
+        if (x[0] - drift_window) ** 2 + (y[0] - drift_window) ** 2 > 10 ** 2:
+            print("Large drift detected, check images for clouds")
+            n += 1
+            if n >= 5:
+                break
+        else:
+            n = 0
 
         idx += x[0] - drift_window
         idy += y[0] - drift_window
