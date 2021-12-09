@@ -23,7 +23,7 @@ setup(
         "rawpy",
         "requests",
         "scipy",
-        "astroscrappy@git+https://github.com/astropy/astroscrappy@master",
+        "astroscrappy@git+https://github.com/astropy/astroscrappy@main",
     ],
     entry_points="""
         [console_scripts]
