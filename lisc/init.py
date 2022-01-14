@@ -25,8 +25,8 @@ from .utils import exif_read
 def dir(folder_name):
     """Initialize calibration directory structure.
 
-    FOLDER_NAME is the folder name the directory structure will be created into.
-    If ommited, will create it in the current directory instead.
+    FOLDER_NAME is the folder name the directory structure will be created
+    into. If ommited, will create it in the current directory instead.
     """
     folders = ["FLATFIELD", "LINEARITY", "PHOTOMETRY"]
     for fold_name in folders:

@@ -47,8 +47,10 @@ from .utils import (
 def CLI_calib(cam_key, images, darks, format, sigma):
     """Image calibration pipeline.
 
-    CAM_KEY: Camera key for calibration. See the available options with `lisc list`.\n
-    IMAGES: Image to convert. Altenatively, one can process multiple images by passing a string containing a wildcard.\n
+    CAM_KEY: Camera key for calibration. See the available options with `lisc
+    list`.\n
+    IMAGES: Image to convert. Altenatively, one can process multiple images by
+    passing a string containing a wildcard.\n
     DARKS: Dark images to use for calibration.
     """
     calib(

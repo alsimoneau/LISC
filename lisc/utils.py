@@ -91,7 +91,8 @@ def exif_read(fname, raw=False):
 
 
 def compute_stats(fnames):
-    # Taken from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+    # Taken from
+    # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
     def _update(existingAggregate, newValue):
         (count, mean, M2) = existingAggregate
         count += 1
@@ -178,6 +179,8 @@ def correct_linearity(data, lin_data="linearity.csv"):
     if type(lin_data) == str:
         lin_data = _pd.read_csv(lin_data)
 
+    idx = _np.argmin(_np.abs(lin_data["Exposure"] - 0.05))
+
     return _np.stack(
         [
             _np.interp(layer, lin_data[band][::-1], c)
@@ -185,8 +188,8 @@ def correct_linearity(data, lin_data="linearity.csv"):
                 "RGB",
                 _np.moveaxis(data, -1, 0),
                 (
-                    lin_data[band][6]
-                    / lin_data["Exposure"][6]
+                    lin_data[band][idx]
+                    / lin_data["Exposure"][idx]
                     * lin_data["Exposure"][::-1]
                     for band in "RGB"
                 ),
