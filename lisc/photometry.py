@@ -8,8 +8,6 @@
 # Created: February 2021
 # Edited: April 2021
 
-import os
-from glob import glob
 from os.path import basename
 
 import click
@@ -18,10 +16,18 @@ import pandas as pd
 import requests
 import yaml
 from progressbar import progressbar
-from scipy.constants import N_A
 from scipy.ndimage import gaussian_filter
 
-from .utils import *
+from .utils import (
+    blur_image,
+    circle_mask,
+    correct_flat,
+    correct_linearity,
+    exif_read,
+    glob_types,
+    open_clipped,
+    open_raw,
+)
 
 
 @click.command(name="photo")
@@ -66,7 +72,7 @@ def photometry(r=50, drift_window=50):
     lin_data = pd.read_csv("linearity.csv")
     flat_data = np.load("flatfield.npy")
 
-    dark = open_clipped("PHOTOMETRY/DARKS/*")
+    dark = blur_image(open_clipped("PHOTOMETRY/DARKS/*"))
 
     idx, idy = p["star_position"]
     idx //= 2
@@ -75,7 +81,7 @@ def photometry(r=50, drift_window=50):
 
     n = 0
     for fname in progressbar(
-        sorted(glob_types(f"PHOTOMETRY/*")), redirect_stdout=True
+        sorted(glob_types("PHOTOMETRY/*")), redirect_stdout=True
     ):
         im = open_raw(fname)
 

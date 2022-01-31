@@ -6,6 +6,7 @@ import pandas as _pd
 import rawpy as _rawpy
 from astroscrappy import detect_cosmics as _detect_cosmics
 from exiftool import ExifTool as _ExifTool
+from scipy.ndimage import gaussian_filter as _gaussian_filter
 
 
 def open_raw(fname, band_list="RGB"):
@@ -173,6 +174,16 @@ def glob_types(pattern="*", types=["ARW", "arw"]):
 def circle_mask(x, y, shape, r):
     Y, X = _np.ogrid[: shape[0], : shape[1]]
     return (X - x) ** 2 + (Y - y) ** 2 < r ** 2
+
+
+def blur_image(image, blur_radius):
+    return _np.stack(
+        [
+            _gaussian_filter(band, blur_radius)
+            for band in _np.moveaxis(image, -1, 0)
+        ],
+        axis=2,
+    )
 
 
 def correct_linearity(data, lin_data="linearity.csv"):

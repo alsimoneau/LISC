@@ -9,7 +9,6 @@
 # Edited: April 2021
 
 import os
-from glob import glob
 
 import click
 import numpy as np
@@ -17,7 +16,13 @@ import pandas as pd
 from progressbar import progressbar
 from scipy.ndimage import gaussian_filter
 
-from .utils import correct_linearity, glob_types, open_clipped, open_raw
+from .utils import (
+    blur_image,
+    correct_linearity,
+    glob_types,
+    open_clipped,
+    open_raw,
+)
 
 
 @click.command(name="flat")
@@ -49,11 +54,11 @@ def flatfield():
             arr[-y:] = 0
         return arr
 
-    dark = open_clipped("FLATFIELD/DARKS/*")
+    dark = blur_image(open_clipped("FLATFIELD/DARKS/*"))
     light = np.zeros_like(dark, dtype=np.float64)
     count = np.zeros(dark.shape[:2], dtype=np.float64)
 
-    fov = np.rad2deg(np.load(f"geometry.npy"))
+    fov = np.rad2deg(np.load("geometry.npy"))
     circle = fov < radius
     pixsixe = fov[0, fov.shape[1] // 2] / (fov.shape[0] / 2)
     blur = gaussian_filter(circle.astype(float), blur_radius / pixsixe)
@@ -72,6 +77,7 @@ def flatfield():
         light += frame * shifted[..., None]
 
     light /= count[..., None]
+    flat = blur_image(light)
 
-    np.save("flatfield", light)
+    np.save("flatfield", flat)
     np.save("flat_weight", count)

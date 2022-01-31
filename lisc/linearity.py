@@ -12,13 +12,11 @@ import os
 from glob import glob
 
 import click
-import exiftool
 import numpy as np
 import pandas as pd
-import yaml
 from progressbar import progressbar
 
-from .utils import exif_read, glob_types, open_clipped, open_raw
+from .utils import blur_image, exif_read, glob_types, open_clipped, open_raw
 
 
 @click.command(name="lin")
@@ -42,8 +40,6 @@ def linearity(size=50):
         for fname in glob("LINEARITY/*.*")
     }
 
-    with open("params") as f:
-        params = yaml.safe_load(f)
     Ny, Nx = open_raw(glob_types("LINEARITY/*")[0]).shape[:2]
     mask = np.zeros((Ny, Nx), dtype=np.bool8)
     mask[
@@ -54,7 +50,7 @@ def linearity(size=50):
     data = []
     for ss in progressbar(sorted(set_times), redirect_stdout=True):
         frame = open_clipped(f"LINEARITY/{ss}_*")
-        dark = open_clipped(f"LINEARITY/DARKS/{ss}_*")
+        dark = blur_image(open_clipped(f"LINEARITY/DARKS/{ss}_*"))
         exif = exif_read(glob_types(f"LINEARITY/{ss}_*")[0])
         data.append((exif["ShutterSpeedValue"], *(frame - dark)[mask].mean(0)))
 

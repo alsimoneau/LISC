@@ -8,7 +8,6 @@
 # Created: February 2021
 # Edited: April 2021
 
-import inspect
 import os
 import shutil
 from glob import glob
@@ -42,7 +41,8 @@ def dir(folder_name):
         "pressure: 101.3      # Air pressure [kPa]",
         "altitude: 0          # Altitude of the measurement site [m]",
         "altitude_aod: 0      # Altitude of the AERONET station used [m]",
-        "altitude_pressure: 0 # Altitude of the site where the pressure was measured [m]",
+        "altitude_pressure: 0 "
+        "# Altitude of the site where the pressure was measured [m]",
     ]
 
     with open("PHOTOMETRY/photometry.params", "w") as f:
@@ -98,7 +98,7 @@ def init():
     #     csv file with appropriate columns
     try:
         a = pd.read_csv("STARFIELD/starfield.csv")
-    except:
+    except FileNotFoundError:
         print("ERROR: Could not read starfield file.")
         error = True
     else:
@@ -118,7 +118,7 @@ def init():
         exif = exif_read(fname)
 
         params = [
-            f"camera_reference_name: ----",
+            "camera_reference_name: ----",
             f"camera: {exif['Make']} {exif['Model']}",
             f"lens: {exif['LensModel']}",
             "focal_length: ----",

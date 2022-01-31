@@ -88,13 +88,13 @@ def starfield():
     theta2, phi2 = align((theta, phi), p0)
 
     p1, foo = curve_fit(radial, alt, theta2)
-    alt2 = radial(alt, *p1)
+    # alt2 = radial(alt, *p1)
 
     x = np.arange(Nx, dtype=float) - Nx / 2 + 0.5
     y = Ny / 2 - np.arange(Ny, dtype=float) + 0.5
     xx, yy = np.meshgrid(x, y)
     r = np.sqrt(xx ** 2 + yy ** 2)
     r2 = radial(np.arctan(psize * r / f), *p1)
-    err = np.sqrt(error(p0, (alt2, az), (theta, phi)))
+    # err = np.sqrt(error(p0, (alt2, az), (theta, phi)))
 
     np.save("geometry", r2)
