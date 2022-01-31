@@ -176,10 +176,10 @@ def circle_mask(x, y, shape, r):
     return (X - x) ** 2 + (Y - y) ** 2 < r ** 2
 
 
-def blur_image(image, blur_radius):
+def blur_image(image, blur_radius=25):
     return _np.stack(
         [
-            _gaussian_filter(band, blur_radius)
+            _gaussian_filter(band, blur_radius, mode="nearest")
             for band in _np.moveaxis(image, -1, 0)
         ],
         axis=2,
