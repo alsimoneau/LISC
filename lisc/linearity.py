@@ -14,9 +14,15 @@ from glob import glob
 import click
 import numpy as np
 import pandas as pd
-from progressbar import progressbar
 
-from .utils import blur_image, exif_read, glob_types, open_clipped, open_raw
+from .utils import (
+    blur_image,
+    exif_read,
+    glob_types,
+    open_clipped,
+    open_raw,
+    parallelize,
+)
 
 
 @click.command(name="lin")
@@ -47,12 +53,15 @@ def linearity(size=50):
         Nx // 2 - size : Nx // 2 + size + 1,
     ] = True
 
-    data = []
-    for ss in progressbar(sorted(set_times), redirect_stdout=True):
+    @parallelize
+    def process(ss, data):
         frame = open_clipped(f"LINEARITY/{ss}_*")
         dark = blur_image(open_clipped(f"LINEARITY/DARKS/{ss}_*"))
         exif = exif_read(glob_types(f"LINEARITY/{ss}_*")[0])
         data.append((exif["ShutterSpeedValue"], *(frame - dark)[mask].mean(0)))
+
+    data = []
+    process(sorted(set_times), data)
 
     df = pd.DataFrame(data, columns=["Exposure", "R", "G", "B"])
     df.to_csv("linearity.csv")

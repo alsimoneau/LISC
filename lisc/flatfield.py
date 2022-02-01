@@ -13,7 +13,6 @@ import os
 import click
 import numpy as np
 import pandas as pd
-from progressbar import progressbar
 from scipy.ndimage import gaussian_filter
 
 from .utils import (
@@ -22,6 +21,7 @@ from .utils import (
     glob_types,
     open_clipped,
     open_raw,
+    parallelize,
 )
 
 
@@ -55,15 +55,14 @@ def flatfield():
         return arr
 
     dark = blur_image(open_clipped("FLATFIELD/DARKS/*"))
-    light = np.zeros_like(dark, dtype=np.float64)
-    count = np.zeros(dark.shape[:2], dtype=np.float64)
 
     fov = np.rad2deg(np.load("geometry.npy"))
     circle = fov < radius
     pixsixe = fov[0, fov.shape[1] // 2] / (fov.shape[0] / 2)
     blur = gaussian_filter(circle.astype(float), blur_radius / pixsixe)
 
-    for fname in progressbar(glob_types("FLATFIELD/*"), redirect_stdout=True):
+    @parallelize
+    def process(fname, count, light):
         foo, el, az = os.path.splitext(os.path.basename(fname))[0].split("_")
         el, az = float(el), float(az) - offset
         r = el / pixsixe
@@ -76,6 +75,9 @@ def flatfield():
         count += shifted
         light += frame * shifted[..., None]
 
+    count = np.zeros(dark.shape[:2], dtype=np.float64)
+    light = np.zeros_like(dark, dtype=np.float64)
+    process(glob_types("FLATFIELD/*"), count, light)
     light /= count[..., None]
     flat = blur_image(light)
 

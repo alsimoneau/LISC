@@ -1,12 +1,22 @@
 import os as _os
 from glob import glob as _glob
 
+import joblib as _joblib
 import numpy as _np
 import pandas as _pd
 import rawpy as _rawpy
 from astroscrappy import detect_cosmics as _detect_cosmics
 from exiftool import ExifTool as _ExifTool
 from scipy.ndimage import gaussian_filter as _gaussian_filter
+
+
+def parallelize(func):
+    def wrapper(iterable, *args):
+        _joblib.Parallel(n_jobs=-1, prefer="threads")(
+            _joblib.delayed(func)(i, *args) for i in iterable
+        )
+
+    return wrapper
 
 
 def open_raw(fname, band_list="RGB"):
