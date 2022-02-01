@@ -12,7 +12,7 @@ from scipy.ndimage import gaussian_filter as _gaussian_filter
 
 def parallelize(func):
     def wrapper(iterable, *args):
-        _joblib.Parallel(n_jobs=-1, prefer="threads")(
+        return _joblib.Parallel(n_jobs=-1, prefer="threads")(
             _joblib.delayed(func)(i, *args) for i in iterable
         )
 
