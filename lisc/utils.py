@@ -187,13 +187,35 @@ def circle_mask(x, y, shape, r):
 
 
 def blur_image(image, blur_radius=25):
-    return _np.stack(
+    """Apply a gaussian filter to an array with nans.
+    Based on code from Markus Dutschke of StackOverflow
+    """
+    nan_msk = _np.isnan(image)
+
+    loss = _np.zeros(image.shape)
+    loss[nan_msk] = 1
+    loss = _np.stack(
         [
-            _gaussian_filter(band, blur_radius, mode="nearest")
+            _gaussian_filter(band, blur_radius, mode="constant", cval=1)
+            for band in _np.moveaxis(loss, -1, 0)
+        ],
+        axis=2,
+    )
+
+    gauss = image.copy()
+    gauss[nan_msk] = 0
+    gauss = _np.stack(
+        [
+            _gaussian_filter(band, blur_radius, mode="constant", cval=0)
             for band in _np.moveaxis(image, -1, 0)
         ],
         axis=2,
     )
+    gauss[nan_msk] = _np.nan
+
+    gauss += loss * image
+
+    return gauss
 
 
 def correct_linearity(data, lin_data="linearity.csv"):

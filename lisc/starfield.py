@@ -10,8 +10,8 @@
 
 import click
 import numpy as np
-import pandas as pd
 import yaml
+from astropy.table import Table
 from scipy.optimize import curve_fit, leastsq
 
 from .utils import cycle_mod, glob_types, open_raw
@@ -24,9 +24,6 @@ def CLI_starfield():
     print("Done.")
 
 
-# TODO: Generalize (astrometry?)
-
-
 def starfield():
     with open("params") as f:
         params = yaml.safe_load(f)
@@ -35,6 +32,9 @@ def starfield():
 
     im = open_raw(glob_types("STARFIELD/starfield")[0])
     Ny, Nx = im.shape[:2]
+
+    def angular_mean(a):
+        return np.arctan2(np.mean(np.sin(a)), np.mean(np.cos(a)))
 
     def align(coords, params):
         theta, phi = coords
@@ -67,34 +67,38 @@ def starfield():
 
     def error(params, y, x):
         ans = align(x, params)
+
         return (
-            np.sin(y[0]) * (cycle_mod(y[0] - ans[0])) ** 2
-            + cycle_mod(y[1] - ans[1]) ** 2
-        )
+            np.sin(y[0]) * np.cos(y[1]) - np.sin(ans[0]) * np.cos(ans[1])
+        ) ** 2 + (
+            np.sin(y[0]) * np.sin(y[1]) - np.sin(ans[0]) * np.sin(ans[1])
+        ) ** 2
 
     def radial(alt, b, c, d, e):
         return b * alt + c * alt ** 2 + d * alt ** 3 + e * alt ** 4
 
-    db = pd.read_csv("STARFIELD/starfield.csv")
+    db = Table.read("STARFIELD/corr.fits")
 
-    xc = db["X"].to_numpy() / 2 - Nx / 2
-    yc = Ny / 2 - db["Y"].to_numpy() / 2
+    xc = db["field_x"] / 2 - Nx / 2
+    yc = Ny / 2 - db["field_y"] / 2
     az = np.pi - np.arctan2(-xc, -yc)
     alt = np.arctan(psize * np.sqrt(xc ** 2 + yc ** 2) / f)
-    theta = np.pi / 2 - np.deg2rad(db["ALT"])
-    phi = np.deg2rad(db["AZ"])
+    theta = np.pi / 2 + np.deg2rad(db["index_dec"])
+    phi = np.deg2rad(db["index_ra"])
 
-    p0, foo = leastsq(error, (1, 1, 1), args=((alt, az), (theta, phi)))
-    theta2, phi2 = align((theta, phi), p0)
+    theta_r, phi_r = align(
+        (theta, phi), (np.pi / 2, angular_mean(phi) - np.pi / 2, theta.mean())
+    )
+
+    p0, foo = leastsq(error, (0, 0, 0), args=((alt, az), (theta_r, phi_r)))
+    theta2, phi2 = align((theta_r, phi_r), p0)
 
     p1, foo = curve_fit(radial, alt, theta2)
-    # alt2 = radial(alt, *p1)
 
     x = np.arange(Nx, dtype=float) - Nx / 2 + 0.5
     y = Ny / 2 - np.arange(Ny, dtype=float) + 0.5
     xx, yy = np.meshgrid(x, y)
     r = np.sqrt(xx ** 2 + yy ** 2)
     r2 = radial(np.arctan(psize * r / f), *p1)
-    # err = np.sqrt(error(p0, (alt2, az), (theta, phi)))
 
     np.save("geometry", r2)
