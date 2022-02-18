@@ -53,6 +53,7 @@ def exif_read(fname, raw=False):
         return exif
 
     gen = [
+        "BitsPerSample",
         "ExposureTime",
         "ISO",
         "LensModel",
@@ -188,33 +189,33 @@ def circle_mask(x, y, shape, r):
 
 def blur_image(image, blur_radius=25):
     """Apply a gaussian filter to an array with nans.
-    Based on code from Markus Dutschke of StackOverflow
+    Based on code from David of StackOverflow:
+        https://stackoverflow.com/a/36307291/7128154
     """
-    nan_msk = _np.isnan(image)
-
-    loss = _np.zeros(image.shape)
-    loss[nan_msk] = 1
-    loss = _np.stack(
-        [
-            _gaussian_filter(band, blur_radius, mode="constant", cval=1)
-            for band in _np.moveaxis(loss, -1, 0)
-        ],
-        axis=2,
-    )
-
     gauss = image.copy()
-    gauss[nan_msk] = 0
+    gauss[_np.isnan(gauss)] = 0
     gauss = _np.stack(
         [
             _gaussian_filter(band, blur_radius, mode="constant", cval=0)
-            for band in _np.moveaxis(image, -1, 0)
+            for band in _np.moveaxis(gauss, -1, 0)
         ],
         axis=2,
     )
-    gauss[nan_msk] = _np.nan
 
-    gauss += loss * image
+    norm = _np.ones(shape=image.shape)
+    norm[_np.isnan(image)] = 0
+    norm = _np.stack(
+        [
+            _gaussian_filter(band, blur_radius, mode="constant", cval=0)
+            for band in _np.moveaxis(norm, -1, 0)
+        ],
+        axis=2,
+    )
 
+    # avoid RuntimeWarning: invalid value encountered in true_divide
+    norm = _np.where(norm == 0, 1, norm)
+    gauss = gauss / norm
+    gauss[_np.isnan(image)] = _np.nan
     return gauss
 
 
