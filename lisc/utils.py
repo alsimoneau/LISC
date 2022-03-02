@@ -72,6 +72,10 @@ def exif_read(fname, raw=False):
                 "MakerNotes:ExposureTime",
             ),
         }
+    elif make == "Raspberry Pi":
+        maker = {"ShutterSpeedValue": "Composite:ShutterSpeed"}
+    else:
+        maker = dict()
 
     def unroll(keys, vals):
         for val in vals:
@@ -178,7 +182,9 @@ def cycle_mod(x, a=2 * _np.pi):
     return _np.where(_np.abs(neg) < pos, neg, pos)
 
 
-def glob_types(pattern="*", types=["ARW", "arw"]):
+def glob_types(pattern="*", types=None):
+    types = ["arw", "dng"]
+    types += [t.upper() for t in types]
     return sum((_glob(f"{pattern}.{t}") for t in types), [])
 
 

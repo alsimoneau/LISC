@@ -27,10 +27,19 @@ def dir(folder_name):
     FOLDER_NAME is the folder name the directory structure will be created
     into. If ommited, will create it in the current directory instead.
     """
+
+    def makedir(*names):
+        name = os.path.join(*names)
+        try:
+            os.makedirs(os.path.join(folder_name, name))
+        except OSError:
+            print(f"`{name}` already exists.")
+
     folders = ["FLATFIELD", "LINEARITY", "PHOTOMETRY"]
     for fold_name in folders:
-        os.makedirs(os.path.join(folder_name, fold_name, "DARKS"))
-    os.makedirs(os.path.join(folder_name, "STARFIELD"))
+        makedir(fold_name)
+        makedir(fold_name, "DARKS")
+    makedir("STARFIELD")
 
     txt = [
         "star_id: 0           # Star's ID in the Yale Bright Star Catalog",

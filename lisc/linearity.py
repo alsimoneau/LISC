@@ -53,15 +53,22 @@ def linearity(size=50):
         Nx // 2 - size : Nx // 2 + size + 1,
     ] = True
 
-    @parallelize
-    def process(ss, data):
-        frame = open_clipped(f"LINEARITY/{ss}_*")
-        dark = blur_image(open_clipped(f"LINEARITY/DARKS/{ss}_*"))
-        exif = exif_read(glob_types(f"LINEARITY/{ss}_*")[0])
-        data.append((exif["ShutterSpeedValue"], *(frame - dark)[mask].mean(0)))
+    images = glob_types("LINEARITY/*_*")
+    darks = glob_types("LINEARITY/DARKS/*_*")
 
-    data = []
-    process(sorted(set_times), data)
+    def filter_fnames(fnames, ss):
+        return [f for f in fnames if os.path.basename(f).startswith(f"{ss}_")]
+
+    @parallelize
+    def process(ss):
+        images_names = filter_fnames(images, ss)
+        darks_names = filter_fnames(darks, ss)
+        frame = open_clipped(images_names)[mask]
+        dark = blur_image(open_clipped(darks_names))[mask]
+        exif = exif_read(images_names[0])
+        return (exif["ShutterSpeedValue"], *(frame - dark).mean(0))
+
+    data = process(sorted(set_times))
 
     df = pd.DataFrame(data, columns=["Exposure", "R", "G", "B"])
     df.to_csv("linearity.csv")
