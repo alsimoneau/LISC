@@ -13,6 +13,7 @@ import os
 import click
 import numpy as np
 import pandas as pd
+import yaml
 from scipy.ndimage import gaussian_filter
 
 from .utils import (
@@ -56,7 +57,22 @@ def flatfield():
 
     dark = blur_image(open_clipped("FLATFIELD/DARKS/*"))
 
-    fov = np.rad2deg(np.load("geometry.npy"))
+    if os.path.isfile("geometry.npy"):
+        fov = np.load("geometry.npy")
+    else:
+        with open("params") as f:
+            params = yaml.safe_load(f)
+        psize = params["pixel_size"] / 1000 * 2
+        f = params["focal_length"]
+
+        Ny, Nx = dark.shape[:2]
+        x = np.arange(Nx, dtype=float) - Nx / 2 + 0.5
+        y = Ny / 2 - np.arange(Ny, dtype=float) + 0.5
+        xx, yy = np.meshgrid(x, y)
+        r = np.sqrt(xx ** 2 + yy ** 2)
+        fov = np.arctan(psize * r / f)
+
+    fov = np.rad2deg(fov)
     circle = fov < radius
     pixsixe = fov[0, fov.shape[1] // 2] / (fov.shape[0] / 2)
     blur = gaussian_filter(circle.astype(float), blur_radius / pixsixe)

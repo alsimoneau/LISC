@@ -74,6 +74,7 @@ def calib(cam_key, images, darks, fmt="npy", sigclip=5):
     dark = open_clipped(darks)
     photo = np.loadtxt(datadir + "photometry.dat")
 
+    new_names = []
     for fname in images:
         print(f"Calibrating '{fname}'...")
         data = (
@@ -87,7 +88,11 @@ def calib(cam_key, images, darks, fmt="npy", sigclip=5):
             * (photo / exif_read(fname)["ShutterSpeedValue"])
         )
 
+        new_name = fname.rsplit(".", 1)[0]
         if fmt == "npy":
-            np.save(fname.rsplit(".", 1)[0], data)
+            np.save(new_name, data)
         elif fmt == "tif":
-            imageio.imsave(fname.rsplit(".", 1)[0] + ".tif", data)
+            imageio.imsave(new_name + ".tif", data)
+
+        new_names.append(f"{new_name}.{fmt}")
+    return new_names

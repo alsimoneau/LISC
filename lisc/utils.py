@@ -22,11 +22,11 @@ def parallelize(func):
 def open_raw(fname, band_list="RGB"):
     print(f"Opening '{fname}'")
     raw = _rawpy.imread(fname)
-    h = raw.sizes.raw_height // 2
-    w = raw.sizes.raw_width // 2
+    h = raw.sizes.height // 2
+    w = raw.sizes.width // 2
 
     data = (
-        raw.raw_image.reshape(h, 2, w, 2)
+        raw.raw_image_visible.reshape(h, 2, w, 2)
         .transpose((1, 3, 0, 2))
         .reshape(4, h, w)
     ) / raw.white_level
