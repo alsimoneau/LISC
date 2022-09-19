@@ -42,7 +42,7 @@ def CLI_linearity(size):
 def linearity(size=50):
     size //= 2
     set_times = {
-        int(fname.split(os.sep)[-1].split("_")[0])
+        fname.split(os.sep)[-1].split("_")[0]
         for fname in glob("LINEARITY/*.*")
     }
 
@@ -68,7 +68,9 @@ def linearity(size=50):
         exif = exif_read(images_names[0])
         return (exif["ShutterSpeedValue"], *(frame - dark).mean(0))
 
-    data = process(sorted(set_times))
+    data = process(set_times)
 
     df = pd.DataFrame(data, columns=["Exposure", "R", "G", "B"])
+    df = df.sort_values("Exposure", ascending=False)
+    df.index = np.arange(len(df))
     df.to_csv("linearity.csv")

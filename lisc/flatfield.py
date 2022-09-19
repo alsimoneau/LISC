@@ -36,7 +36,7 @@ def CLI_flatfield():
 # TODO: Add parameters to CLI
 # TODO: Generalize
 def flatfield():
-    offset = (6000 - 1320 * 4) / 31
+    offset = (6000 - 1442 * 4) * 3 / 31
     radius = 5  # degrees
     blur_radius = 1
 
@@ -48,11 +48,11 @@ def flatfield():
             arr[:, :x] = 0
         else:
             arr[:, x:] = 0
-        arr = np.roll(arr, -y, 0)
-        if y < 0:
-            arr[:-y] = 0
+        arr = np.roll(arr, y, 0)
+        if y > 0:
+            arr[:y] = 0
         else:
-            arr[-y:] = 0
+            arr[y:] = 0
         return arr
 
     dark = blur_image(open_clipped("FLATFIELD/DARKS/*"))
@@ -80,13 +80,14 @@ def flatfield():
     @parallelize
     def process(fname, count, light):
         foo, el, az = os.path.splitext(os.path.basename(fname))[0].split("_")
-        el, az = float(el), float(az) - offset
+        el, az = float(el), -float(az) - offset
         r = el / pixsixe
-        x = int(round(r * np.sin(np.deg2rad(az))))
-        y = -int(round(r * np.cos(np.deg2rad(az))))
+        x = int(round(r * np.cos(np.deg2rad(az))))
+        y = int(round(r * np.sin(np.deg2rad(az))))
 
         shifted = shift(blur, x, y)
         frame = correct_linearity(open_raw(fname) - dark, lin_data)
+        # frame = open_raw(fname) - dark
 
         count += shifted
         light += frame * shifted[..., None]
