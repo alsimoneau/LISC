@@ -15,6 +15,7 @@ setup(
     install_requires=[
         "Click",
         "imageio",
+        "joblib",
         "matplotlib",
         "numpy",
         "pandas",
