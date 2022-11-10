@@ -1,5 +1,6 @@
-import lisc
 from setuptools import setup
+
+import lisc
 
 setup(
     name="LISC",
@@ -27,6 +28,6 @@ setup(
     ],
     entry_points="""
         [console_scripts]
-        lisc=lisc.main:lisc
+        lisc=lisc.main:main
     """,
 )

@@ -10,7 +10,6 @@
 
 import os
 
-import click
 import numpy as np
 import pandas as pd
 import yaml
@@ -24,13 +23,6 @@ from .utils import (
     open_raw,
     parallelize,
 )
-
-
-@click.command(name="flat")
-def CLI_flatfield():
-    """Process frames for flat field calibration."""
-    flatfield()
-    print("Done.")
 
 
 # TODO: Add parameters to CLI
@@ -69,7 +61,7 @@ def flatfield():
         x = np.arange(Nx, dtype=float) - Nx / 2 + 0.5
         y = Ny / 2 - np.arange(Ny, dtype=float) + 0.5
         xx, yy = np.meshgrid(x, y)
-        r = np.sqrt(xx ** 2 + yy ** 2)
+        r = np.sqrt(xx**2 + yy**2)
         fov = np.arctan(psize * r / f)
 
     fov = np.rad2deg(fov)

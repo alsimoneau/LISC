@@ -10,7 +10,6 @@
 
 from os.path import basename
 
-import click
 import numpy as np
 import pandas as pd
 import requests
@@ -29,28 +28,13 @@ from .utils import (
     open_raw,
 )
 
-
-@click.command(name="photo")
-@click.option("-r", "--radius", type=float, default=50)
-@click.option("-w", "--drift-window", type=int, default=200)
-def CLI_photometry(radius, drift_window):
-    """Process frames for stellar photometry calibration.
-
-    Integrates the stellar flux using a disk of radius RADIUS pixels.
-    The star used is identified by it's ID in the Yale Bright Star Catalog.
-    """
-
-    photometry(r=radius, drift_window=drift_window)
-    print("Done.")
-
-
 # TODO: Use astrometry for star identification
 
 
 def lowtran(wls):
     """Railegh molecular optical depth from eq.30 of Kneizys (1980).
     Expects wls in µm."""
-    return 1 / ((wls ** 4 * 115.6406) - wls ** 2 * 1.335)
+    return 1 / ((wls**4 * 115.6406) - wls**2 * 1.335)
 
 
 def aeronet(wls):
@@ -58,8 +42,8 @@ def aeronet(wls):
     Expects wls in µm."""
     return (
         0.0021520
-        * (1.0455996 - 341.29061 * wls ** (-2) - 0.90230850 * wls ** 2)
-        / (1 + 0.0027059889 * wls ** (-2) - 85.968563 * wls ** 2)
+        * (1.0455996 - 341.29061 * wls ** (-2) - 0.90230850 * wls**2)
+        / (1 + 0.0027059889 * wls ** (-2) - 85.968563 * wls**2)
     )
 
 
@@ -80,9 +64,7 @@ def photometry(r=50, drift_window=50):
     outs = pd.DataFrame(columns=["Filename", "SAT", "X", "Y", "R", "G", "B"])
 
     n = 0
-    for fname in progressbar(
-        sorted(glob_types("PHOTOMETRY/*")), redirect_stdout=True
-    ):
+    for fname in progressbar(sorted(glob_types("PHOTOMETRY/*")), redirect_stdout=True):
         im = open_raw(fname)
 
         crop = im[
@@ -93,7 +75,7 @@ def photometry(r=50, drift_window=50):
         blurred = gaussian_filter(crop.mean(2), 10, mode="constant")
         y, x = np.where(blurred == blurred.max())
 
-        if (x[0] - drift_window) ** 2 + (y[0] - drift_window) ** 2 > 10 ** 2:
+        if (x[0] - drift_window) ** 2 + (y[0] - drift_window) ** 2 > 10**2:
             print("Large drift detected, check images for clouds")
             n += 1
             if n >= 5:

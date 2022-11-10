@@ -20,8 +20,11 @@ def parallelize(func):
 
 
 def open_raw(fname, band_list="RGB"):
-    print(f"Opening '{fname}'")
-    raw = _rawpy.imread(fname)
+    try:
+        raw = _rawpy.imread(fname)
+    except _rawpy.LibRawFileUnsupportedError:
+        raise TypeError("Unsupported file format")
+
     h = raw.sizes.height // 2
     w = raw.sizes.width // 2
 
@@ -37,10 +40,7 @@ def open_raw(fname, band_list="RGB"):
     )
 
     return _np.stack(
-        [
-            _np.mean(data[b], axis=0) if sum(b) > 1 else data[b][0]
-            for b in bands_mask
-        ],
+        [_np.mean(data[b], axis=0) if sum(b) > 1 else data[b][0] for b in bands_mask],
         axis=-1,
     )
 
@@ -134,10 +134,7 @@ def compute_stats(fnames):
 def open_clipped(fnames, mean=None, stdev=None, sigclip=5):
     basename = ""
     if type(fnames) == str:
-        basename = (
-            fnames.replace("*", "$").replace("?", "&").replace(".", "!")
-            + ".npy"
-        )
+        basename = fnames.replace("*", "$").replace("?", "&").replace(".", "!") + ".npy"
         if _os.path.isfile(basename):
             print(f"Opening {fnames} from cache")
             return _np.load(basename)
@@ -166,10 +163,7 @@ def cosmicray_removal(image, **kwargs):
         kwargs["sigclip"] = 25
     if image.ndim == 3:
         new_data = _np.stack(
-            [
-                _detect_cosmics(band, **kwargs)[1]
-                for band in _np.moveaxis(image, -1, 0)
-            ],
+            [_detect_cosmics(band, **kwargs)[1] for band in _np.moveaxis(image, -1, 0)],
             axis=2,
         )
     else:
@@ -190,7 +184,7 @@ def glob_types(pattern="*", types=None):
 
 def circle_mask(x, y, shape, r):
     Y, X = _np.ogrid[: shape[0], : shape[1]]
-    return (X - x) ** 2 + (Y - y) ** 2 < r ** 2
+    return (X - x) ** 2 + (Y - y) ** 2 < r**2
 
 
 def blur_image(image, blur_radius=25):

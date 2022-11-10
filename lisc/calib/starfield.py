@@ -8,13 +8,12 @@
 # Created: March 2021
 # Edited: April 2021
 
-import click
 import numpy as np
 import yaml
 from astropy.table import Table
 from scipy.optimize import curve_fit, leastsq
 
-from .utils import cycle_mod, glob_types, open_raw
+from .utils import glob_types, open_raw
 
 
 def angular_mean(a):
@@ -54,22 +53,13 @@ def align(coords, params):
 def error(params, y, x):
     ans = align(x, params)
 
-    return (
-        np.sin(y[0]) * np.cos(y[1]) - np.sin(ans[0]) * np.cos(ans[1])
-    ) ** 2 + (
+    return (np.sin(y[0]) * np.cos(y[1]) - np.sin(ans[0]) * np.cos(ans[1])) ** 2 + (
         np.sin(y[0]) * np.sin(y[1]) - np.sin(ans[0]) * np.sin(ans[1])
     ) ** 2
 
 
 def radial(alt, b, c, d, e):
-    return b * alt + c * alt ** 2 + d * alt ** 3 + e * alt ** 4
-
-
-@click.command(name="geo")
-def CLI_starfield():
-    """Process frames for star field calibration."""
-    starfield()
-    print("Done.")
+    return b * alt + c * alt**2 + d * alt**3 + e * alt**4
 
 
 def starfield():
@@ -86,7 +76,7 @@ def starfield():
     xc = db["field_x"] / 2 - Nx / 2
     yc = Ny / 2 - db["field_y"] / 2
     az = np.arctan2(-xc, yc)
-    alt = np.arctan(psize * np.sqrt(xc ** 2 + yc ** 2) / f)
+    alt = np.arctan(psize * np.sqrt(xc**2 + yc**2) / f)
     theta = np.pi / 2 + np.deg2rad(db["index_dec"])
     phi = np.deg2rad(db["index_ra"])
 
@@ -102,7 +92,7 @@ def starfield():
     x = np.arange(Nx, dtype=float) - Nx / 2 + 0.5
     y = Ny / 2 - np.arange(Ny, dtype=float) + 0.5
     xx, yy = np.meshgrid(x, y)
-    r = np.sqrt(xx ** 2 + yy ** 2)
+    r = np.sqrt(xx**2 + yy**2)
     r2 = radial(np.arctan(psize * r / f), *p1)
 
     np.save("geometry", r2)

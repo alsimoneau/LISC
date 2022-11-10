@@ -11,7 +11,6 @@
 import os
 from glob import glob
 
-import click
 import numpy as np
 import pandas as pd
 
@@ -25,25 +24,10 @@ from .utils import (
 )
 
 
-@click.command(name="lin")
-@click.option(
-    "-s",
-    "--size",
-    type=int,
-    default=50,
-    help="Size of the window to process. (Default: 50)",
-)
-def CLI_linearity(size):
-    """Process frames for linearity calibration."""
-    linearity(size)
-    print("Done.")
-
-
 def linearity(size=50):
     size //= 2
     set_times = {
-        fname.split(os.sep)[-1].split("_")[0]
-        for fname in glob("LINEARITY/*.*")
+        fname.split(os.sep)[-1].split("_")[0] for fname in glob("LINEARITY/*.*")
     }
 
     Ny, Nx = open_raw(glob_types("LINEARITY/*")[0]).shape[:2]
