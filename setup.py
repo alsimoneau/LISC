@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 import lisc
 
@@ -10,7 +10,7 @@ setup(
     author="Alexandre Simoneau",
     author_email="alsimoneau@gmail.com",
     liscence="MIT",
-    packages=["lisc"],
+    packages=find_packages("."),
     zip_safe=False,
     install_requires=[
         "Click",
