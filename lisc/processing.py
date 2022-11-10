@@ -14,6 +14,7 @@ import lisc.utils
     "-p",
     "--percentile",
     default=[100, 99, 95, 90],
+    type=float,
     multiple=True,
     help="The percentile value to extract. Can be specified multiple times.",
 )
