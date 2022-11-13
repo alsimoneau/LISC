@@ -25,6 +25,7 @@ functions = (
     (".init", "save"),
     (".init", "list"),
     (".processing", "perc"),
+    (".processing", "gray"),
 )
 
 for module_name, method in functions:

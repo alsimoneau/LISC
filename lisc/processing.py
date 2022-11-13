@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+import os
+
 import click
+import imageio
 import numpy as np
 import pandas as pd
-from PIL import Image
 
 import lisc.utils
 
@@ -28,8 +30,8 @@ def perc(filename, percentile):
         im = lisc.utils.open_raw(filename)
     except TypeError as err:
         try:
-            im = np.asarray(Image.open(filename).convert("RGB"))
-        except Image.UnidentifiedImageError:
+            im = imageio.imread(filename)
+        except OSError:
             raise err
 
     perc = np.percentile(im, percentile, (0, 1))
@@ -38,3 +40,13 @@ def perc(filename, percentile):
         print(f"R = {perc[0,0]:.2g}    G = {perc[0,1]:.2g}    B = {perc[0,2]:.2g}")
     else:
         print(pd.DataFrame(perc, index=percentile, columns=["R", "G", "B"]))
+
+
+@click.command()
+@click.argument("filename", type=click.Path(exists=True))
+@click.argument("weights", nargs=3, type=float, default=[1 / 3, 1 / 3, 1 / 3])
+def gray(filename, weights):
+    im = imageio.imread(filename)
+    gr = np.dot(im, weights)
+    name, ext = os.path.splitext(filename)
+    imageio.imwrite("".join([name, "_gr", ext]), gr)
