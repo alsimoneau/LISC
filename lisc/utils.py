@@ -1,12 +1,12 @@
 import os as _os
 from glob import glob as _glob
 
+import exiftool as _exiftool
 import joblib as _joblib
 import numpy as _np
 import pandas as _pd
 import rawpy as _rawpy
 from astroscrappy import detect_cosmics as _detect_cosmics
-from exiftool import ExifTool as _ExifTool
 from scipy.ndimage import gaussian_filter as _gaussian_filter
 
 
@@ -46,8 +46,8 @@ def open_raw(fname, band_list="RGB"):
 
 
 def exif_read(fname, raw=False):
-    with _ExifTool() as et:
-        exif = et.get_metadata(fname)
+    with _exiftool.ExifToolHelper() as et:
+        exif = et.get_metadata(fname)[0]
 
     if raw:
         return exif
@@ -70,7 +70,7 @@ def exif_read(fname, raw=False):
                 "MakerNotes:SonyExposureTime",
                 "MakerNotes:SonyExposureTime2",
                 "MakerNotes:ExposureTime",
-            ),
+            )
         }
     elif make == "Raspberry Pi":
         maker = {"ShutterSpeedValue": "Composite:ShutterSpeed"}
@@ -184,7 +184,7 @@ def glob_types(pattern="*", types=None):
 
 def circle_mask(x, y, shape, r):
     Y, X = _np.ogrid[: shape[0], : shape[1]]
-    return (X - x) ** 2 + (Y - y) ** 2 < r**2
+    return (X - x) ** 2 + (Y - y) ** 2 < r ** 2
 
 
 def blur_image(image, blur_radius=25):
